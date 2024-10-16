@@ -30,5 +30,5 @@
 - commande a taper
   - npm install
   - npm run dev (compile auto apres save)
-  - télécharger les extensions prettier, eslint
-  - bonjour
+  - télécharger les extensions prettier, eslint (si c'est pas fait)
+  - 
