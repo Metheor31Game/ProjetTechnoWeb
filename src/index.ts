@@ -22,12 +22,21 @@ app.get("/", (req: Request, res: Response) => {
 
 });
 
-//Route de connection à la base de donnée
+//Route pour se connecter
 app.get("/connection", (req: Request, res: Response) => {
   res.render("connection", {
 
   })
 })
+
+//Route pour s'inscrire
+app.get("/inscription", (req:Request, res:Response) => {
+  res.render("inscription", {
+    
+  })
+})
+
+
 
 // Lancer le serveur
 const server = app.listen(port, () => {
