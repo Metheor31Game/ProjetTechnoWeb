@@ -32,3 +32,15 @@
   - npm run dev (compile auto apres save)
   - télécharger les extensions prettier, eslint (si c'est pas fait)
   - 
+
+
+- Pour le docker :
+  - docker compose up -d -> Démarre le service
+  - docker compose down -> Eteint le service
+  - docker compose down -v -> Eteint le service et delete le volume (permet de clean le volume)
+
+  - http://localhost:9000 -> accés à la bdd
+
+  - spot -> identifiant
+  - spot-passwd -> mot de passe
+
