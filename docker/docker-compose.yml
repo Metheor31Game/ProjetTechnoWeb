@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container # nom du container
+    environment:
+      MYSQL_ROOT_PASSWORD: admin2024 #mot de passe root
+      MYSQL_DATABASE: dbSpotMinder # nom de la base de données
+      MYSQL_USER: spot # nom d'utilisateur
+      MYSQL_PASSWORD: spot-passwd # mot de passe utilisateur
+    ports:
+      - "3306:3306" # expose MySQL sur le port 3306
+    volumes:
+      - mysql_data:/var/lib/mysql # sauvegarde les données sur le volume "mysql_data"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_container # nom du container
+    environment:
+      PMA_HOST: mysql # indique à phpMyAdmin d'utiliser le service mysql
+      PMA_USER: spot # utilisateur pour se connecter (doit correspondre à MYSQL_USER)
+      PMA_PASSWORD: spot-passwd # mot de passe pour se connecter (doit correspondre à MYSQL_PASSWORD)
+    ports:
+      - "8080:80" # expose phpMyAdmin sur le port 8080
+
+volumes:
+  mysql_data:

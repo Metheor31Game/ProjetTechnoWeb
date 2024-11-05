@@ -1,0 +1,12 @@
+docker-compose up -d -> Démarre le service
+
+docker-compose down -> Eteint le service
+
+docker-compose down -v -> Eteint le service et delete le volume (permet de clean le volume)
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+http://localhost:8080 -> accés à la bdd
+
+spot -> identifiant
+spot-passwd -> mot de passe
