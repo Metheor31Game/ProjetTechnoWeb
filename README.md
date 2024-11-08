@@ -44,3 +44,6 @@
   - spot -> identifiant
   - spot-passwd -> mot de passe
 
+- Gestion sign in/ log in :
+  - utilisation de bcrypt (point fort : anti brutforce + sécurité a mettre dans le site (tentative de connexion))
+  - stockage des hash des password dans la base de donnée
