@@ -4,6 +4,7 @@
   "description": "- Première idée :     - Page log in/sign in (est-ce qu'on le partagera plus tard en deux pages ?)       - log in : id / mdp       - sign in : nom / prenom / email / mdp / ...",
   "main": "index.js",
   "scripts": {
+    "backup": "docker/auto.sh",
     "build": "tsc",
     "dev": "nodemon server/index.ts",
     "lint": "eslint ./public",

@@ -12,7 +12,9 @@ services:
     ports:
       - "3306:3306" # expose MySQL sur le port 3306
     volumes:
-      - mysql_data:/var/lib/mysql # sauvegarde les données sur le volume "mysql_data"
+      # - mysql_data:/var/lib/mysql # sauvegarde les données sur le volume "mysql_data"
+      - ./src:/var/www/html
+      - ./backup:/backup 
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
