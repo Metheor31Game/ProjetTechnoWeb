@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { assertType, expectTypeOf, test } from "vitest";
-import { initialiseDatabase } from "./bdd";
+import { initialiseDatabase, closeDatabase } from "./bdd";
 
 //const exphbs = require("express-handlebars");
 
@@ -44,6 +44,13 @@ initialiseDatabase()
   .catch((err) => {
     console.error("Erreur lors de l'initialisation de la DATABASE : ", err);
   });
+
+// Fermeture propre de la base de données lors de l'arrêt du serveur
+process.on("SIGINT", async () => {
+  console.log("Arrêt du serveur...");
+  await closeDatabase();
+  process.exit(0);
+});
 
 /*
 if (import.meta.hot) {
