@@ -6,7 +6,7 @@ services:
         ports:
             - "10000:80"
         volumes:
-            - www:/var/www/html
+            - ./www:/var/www/html
         links:
             - db:db
     db:
@@ -14,7 +14,7 @@ services:
         ports:
             - "10002:3306"
         volumes:
-            - mysql:/var/lib/mysql
+            - ./mysql:/var/lib/mysql
         environment:
             - MYSQL_ROOT_PASSWORD=adminspotminder
     myadmin:
