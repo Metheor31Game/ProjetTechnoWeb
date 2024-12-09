@@ -16,6 +16,9 @@ services:
         volumes:
             - ./mysql:/var/lib/mysql
         environment:
+            - MYSQL_USER=spot # nom d'utilisateur
+            - MYSQL_PASSWORD=spot-passwd # mot de passe utilisateur
+            - MYSQL_DATABASE=dbSpotMinder
             - MYSQL_ROOT_PASSWORD=adminspotminder
     myadmin:
         image: phpmyadmin/phpmyadmin
