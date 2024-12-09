@@ -6,9 +6,9 @@ export async function initialiseDatabase() {
   try {
     connection = await mysql.createConnection({
       host: process.env.DB_HOST || "localhost",
-      user: process.env.DB_USER || "spot",
-      password: process.env.DB_PASSWORD || "spot-passwd",
-      database: process.env.DB_NAME || "dbSpotMinder",
+      user: process.env.DB_USER || "root",
+      password: process.env.DB_PASSWORD || "adminspotminder",
+      //database: process.env.DB_NAME || "dbSpotMinder",
     });
     console.log("Connexion à la base de données réussie !");
   } catch (err) {
