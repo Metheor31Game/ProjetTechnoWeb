@@ -17,7 +17,7 @@ docker compose {
           volumes:
               - /home/cbessi00/L3/BDD/tp3/docker/mysql:/var/lib/mysql
           environment:
-              - MYSQL_ROOT_PASSWORD=licinfo2020
+              - MYSQL_ROOT_PASSWORD=test
       myadmin:
           image: phpmyadmin/phpmyadmin
           ports:
