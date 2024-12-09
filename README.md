@@ -1,14 +1,20 @@
-- Première idée :
 
-  - Page log in/sign in (est-ce qu'on le partagera plus tard en deux pages ?)
-    - log in : id / mdp
-    - sign in : nom / prenom / email / mdp / ...
-  - page principale :
+  - Page d'accueil :
+    - Bouton connection/inscription
 
+  - Page log in/sign in
+    - log in : pseudo + mdp
+      
+    - sign in : pseudo / nom / prenom / email / mdp
+
+
+  - page "Dashboard" :
     - liste de toutes les annonces
+      
     - options supplémentaires plus tard ...
 
   - page descriptives du bien :
+    
     - Champ de saisie : titre
     - Zone photo du bien
     - ajout carte/localisation du bien
@@ -17,21 +23,19 @@
     - bouton d'enregistrement des modifications
 
 - to do list :
-  - initialisation du projet (à voir ensemble)
-    - typescript
-    - voir comment faire pour le design (bootstrap ???)
-    - BDD ??
-  - build quelques page afin de lancer le projet
-    - ordre d'exécution :
-      - page descriptive
-      - page principale
-      - page log in/sign in
+  
+    - Design
+    - BDD (utilisateur, annonce : ok)
 
 - commande a taper
+  
   - npm install
-  - npm run dev (compile auto apres save)
+  - cd docker && docker compose up -d (lance les containers accés mysql : localhost:10001)
+  - importer la base de donnée dans mysql (prendre la db : dbSpotMinder.sql)
+  - npm run dev (lance le server sur le port 3000)
+    
   - télécharger les extensions prettier, eslint (si c'est pas fait)
-  - 
+    
 
 
 - Pour le docker :
@@ -39,10 +43,11 @@
   - docker compose down -> Eteint le service
   - docker compose down -v -> Eteint le service et delete le volume (permet de clean le volume)
 
-  - http://localhost:9000 -> accés à la bdd
+  - http://localhost:10001 -> accés à la bdd
 
-  - spot -> identifiant
-  - spot-passwd -> mot de passe
+- log admin :
+  - root -> identifiant
+  - adminspotminder -> mot de passe
 
 - Gestion sign in/ log in :
   - utilisation de bcrypt (point fort : anti brutforce + sécurité a mettre dans le site (tentative de connexion))
