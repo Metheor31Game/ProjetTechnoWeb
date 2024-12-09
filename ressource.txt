@@ -1,0 +1,27 @@
+docker compose {
+  version: '2'
+  
+  services:
+      web:
+          image: lavoweb/php-7.4
+          ports:
+              - "10000:80"
+          volumes:
+              - /home/cbessi00/L3/BDD/tp3/docker/www:/var/www/html
+          links:
+              - db:db
+      db:
+          image: mysql:8.0
+          ports:
+              - "10002:3306"
+          volumes:
+              - /home/cbessi00/L3/BDD/tp3/docker/mysql:/var/lib/mysql
+          environment:
+              - MYSQL_ROOT_PASSWORD=licinfo2020
+      myadmin:
+          image: phpmyadmin/phpmyadmin
+          ports:
+              - "10001:80"
+          links:
+              - db:db
+  }
