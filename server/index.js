@@ -14,6 +14,7 @@ app.set("views", path.join(__dirname, "../public/views"));
 // Middleware pour parser le corps des requêtes en JSON ou en URL-encoded
 app.use(express.urlencoded({ extended: true })); // Pour les formulaires classiques
 app.use(express.json()); // Pour les données JSON
+app.use(express.static("public"))
 
 
 // Route principale
