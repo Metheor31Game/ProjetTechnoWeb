@@ -122,6 +122,50 @@ app.post("/inscription", async (req, res) => {
 });
 
 
+//Route pour son dashboard
+app.get("/dashboard", async (req, res) => {
+  let connection = await initialiseDatabase();
+  if (!connection) {
+    return res.status(500).json({ message: "Erreur de connexion à la base de données" });
+  }
+
+  // Simulation de 3 annonces
+  const annonces = [
+    {
+      titre: "Appartement 3 pièces à louer",
+      date: "2024-12-01",
+      adresse: "12 Rue de la République, Lyon, 69001",
+      description: "Bel appartement de 3 pièces avec un grand séjour et une cuisine équipée."
+    },
+    {
+      titre: "Maison avec jardin",
+      date: "2024-12-05",
+      adresse: "45 Avenue des Champs-Élysées, Paris, 75008",
+      description: "Grande maison de 5 chambres avec un jardin spacieux et un garage."
+    },
+    {
+      titre: "Studio à vendre",
+      date: "2024-11-28",
+      adresse: "78 Boulevard Saint-Germain, Paris, 75005",
+      description: "Studio de 30m² idéalement situé dans le quartier latin, parfait pour un investisseur."
+    }
+  ];
+
+  try {
+
+
+    // // Récupérer les annonces de la base de données (exemple avec une table 'annonces')
+    // const [annonces] = await connection.query("SELECT * FROM annonces");
+    // Passer les annonces à la vue dashboard.handlebars
+    res.render("dashboard", {
+      title: "Dashboard",
+      annonces: annonces // On passe les annonces ici
+    });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des annonces : ", err);
+    res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+});
 
 
 

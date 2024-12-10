@@ -1,0 +1,79 @@
+/* Style spécifique au Dashboard pour les petites annonces */
+
+/* Container des annonces */
+.annonces {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Style pour chaque annonce */
+.annonce {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Effet au survol */
+.annonce:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Titres des annonces */
+.annonce h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Informations de l'annonce */
+.annonce p {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+}
+
+/* Description de l'annonce */
+.annonce .description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Pour les annonces sans description */
+.annonce .description:empty {
+    font-style: normal;
+    color: #999;
+}
+
+/* Idéal pour des annonces avec un prix */
+.annonce p:last-of-type {
+    font-weight: bold;
+    color: #1e293b;
+}
+
+/* Si l'on souhaite ajouter un bouton pour chaque annonce */
+.annonce button {
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+.annonce button:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+}
