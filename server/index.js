@@ -48,7 +48,7 @@ app.get("/data", async (req, res) => {
 
 // Route pour se connecter (GET)
 app.get("/connection", (req, res) => {
-  res.render("connection", {});
+  return res.render("connection", {});
 });
 
 // Route pour gérer la connexion (POST)
@@ -94,7 +94,7 @@ app.post("/connection", async (req, res) => {
 
 // Route pour s'inscrire
 app.get("/inscription", (req, res) => {
-  res.render("inscription", {});
+  return res.render("inscription", {});
 });
 
 // Route pour gérer l'inscription (POST)
@@ -127,35 +127,15 @@ app.post("/inscription", async (req, res) => {
 
 //Route pour son dashboard
 app.get("/dashboard", async (req, res) => {
+  if (currentUser == "") {
+    return res.redirect("/connection");
+
+  }
+  console.log("ICIIIIIIIIIIIIIIIIIIIIII + " + currentUser)
   let connection = await initialiseDatabase();
   if (!connection) {
     return res.status(500).json({ message: "Erreur de connexion à la base de données" });
   }
-  if (currentUser == "") {
-    res.redirect("/connection");
-  }
-
-  // Simulation de 3 annonces
-  const annonces = [
-    {
-      titre: "Appartement 3 pièces à louer",
-      date: "2024-12-01",
-      adresse: "12 Rue de la République, Lyon, 69001",
-      description: "Bel appartement de 3 pièces avec un grand séjour et une cuisine équipée."
-    },
-    {
-      titre: "Maison avec jardin",
-      date: "2024-12-05",
-      adresse: "45 Avenue des Champs-Élysées, Paris, 75008",
-      description: "Grande maison de 5 chambres avec un jardin spacieux et un garage."
-    },
-    {
-      titre: "Studio à vendre",
-      date: "2024-11-28",
-      adresse: "78 Boulevard Saint-Germain, Paris, 75005",
-      description: "Studio de 30m² idéalement situé dans le quartier latin, parfait pour un investisseur."
-    }
-  ];
 
   try {
 
@@ -163,7 +143,7 @@ app.get("/dashboard", async (req, res) => {
     const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = ?", [currentUser]);
 
     // Vérifier si l'ID du dashboard existe
-    if (!dashboard) {
+    if (!dashboard[0].id_dashboard) {
       return res.status(404).json({ message: "Dashboard introuvable" });
     }
 
@@ -190,15 +170,15 @@ app.get("/dashboard", async (req, res) => {
 
 
 app.get('/upload', (req, res) => {
+  if (currentUser == "") {
+    return res.redirect("/connection")
+  }
   res.render("upload", {})
 })
 
 
 app.post("/upload", async (req, res) => {
 
-  if (currentUser = "") {
-    res.redirect("/connection")
-  }
 
   const { titre, adresse, description, lien } = req.body;
 

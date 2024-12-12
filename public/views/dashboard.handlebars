@@ -3,19 +3,19 @@
 
 <main>
   <h1>{{title}}</h1>
-  
+
   {{#if annonces.length}}
-    <div class="annonces">
-      {{#each annonces}}
-        <div class="annonce" id="annonce-{{@index}}">
-          <h2>{{this.titre}}</h2>
-          <p>Date de mise en ligne : {{this.date}}</p>
-          <p>Adresse : {{this.adresse}} €</p>
-          <p class="description">Description : {{this.description}}</p>
-        </div>
-      {{/each}}
+  <div class="annonces">
+    {{#each annonces}}
+    <div class="annonce" id="annonce-{{@index}}">
+      <h2>{{this.titre}}</h2>
+      <p>Date de mise en ligne : {{this.date}}</p>
+      <p>Adresse : {{this.adresse}} €</p>
+      <p class="description">Description : {{this.description}}</p>
     </div>
+    {{/each}}
+  </div>
   {{else}}
-    <p>Aucune annonce disponible pour le moment.</p>
+  <p>Aucune annonce disponible pour le moment.</p>
   {{/if}}
 </main>
