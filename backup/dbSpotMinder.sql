@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : db
--- Généré le : mar. 10 déc. 2024 à 14:52
--- Version du serveur : 8.0.39
+-- Généré le : jeu. 12 déc. 2024 à 10:03
+-- Version du serveur : 8.0.40
 -- Version de PHP : 8.2.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -33,8 +33,18 @@ CREATE TABLE `annonce` (
   `titre` varchar(60) NOT NULL,
   `date` varchar(20) NOT NULL,
   `adresse` varchar(80) NOT NULL,
-  `description` varchar(220) NOT NULL
+  `description` varchar(220) NOT NULL,
+  `lien` varchar(120) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `annonce`
+--
+
+INSERT INTO `annonce` (`id`, `id_dashboard`, `titre`, `date`, `adresse`, `description`, `lien`) VALUES
+(1, 1, 'Appartement 3 pièces à louer', '2024-12-01', '12 Rue de la République, Lyon, 69001', 'Bel appartement de 3 pièces avec un grand séjour et une cuisine équipée.', ''),
+(2, 1, 'Maison avec jardin', '2024-12-05', '45 Avenue des Champs-Élysées, Paris, 75008', 'Grande maison de 5 chambres avec un jardin spacieux et un garage', ''),
+(3, 1, 'Studio à vendre', '2024-11-28', '78 Boulevard Saint-Germain, Paris, 75005', 'Studio de 30m² idéalement situé dans le quartier latin, parfait pour un investisseur.', '');
 
 -- --------------------------------------------------------
 
@@ -115,7 +125,7 @@ ALTER TABLE `utilisateur`
 -- AUTO_INCREMENT pour la table `annonce`
 --
 ALTER TABLE `annonce`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT pour la table `dashboard`

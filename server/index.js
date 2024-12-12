@@ -16,6 +16,8 @@ app.use(express.urlencoded({ extended: true })); // Pour les formulaires classiq
 app.use(express.json()); // Pour les données JSON
 app.use(express.static("public"))
 
+let currentUser = "";
+
 
 // Route principale
 app.get("/", (req, res) => {
@@ -74,6 +76,7 @@ app.post("/connection", async (req, res) => {
       // Ici, vous pouvez vérifier si le mot de passe est correct
       // Par exemple, comparer mdp avec celui dans la base (en clair ou en utilisant bcrypt)
       if (password === mdp) {
+        currentUser = pseudo;
         res.redirect("/dashboard");  // Rediriger vers la page d'accueil si la connexion est réussie
       } else {
         res.status(401).send("Mot de passe incorrect");
@@ -128,6 +131,9 @@ app.get("/dashboard", async (req, res) => {
   if (!connection) {
     return res.status(500).json({ message: "Erreur de connexion à la base de données" });
   }
+  if (currentUser == "") {
+    res.redirect("/connection");
+  }
 
   // Simulation de 3 annonces
   const annonces = [
@@ -153,10 +159,24 @@ app.get("/dashboard", async (req, res) => {
 
   try {
 
+    // Requête pour obtenir l'ID du dashboard basé sur le pseudo
+    const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = ?", [currentUser]);
 
-    // // Récupérer les annonces de la base de données (exemple avec une table 'annonces')
-    // const [annonces] = await connection.query("SELECT * FROM annonces");
-    // Passer les annonces à la vue dashboard.handlebars
+    // Vérifier si l'ID du dashboard existe
+    if (!dashboard) {
+      return res.status(404).json({ message: "Dashboard introuvable" });
+    }
+
+    const dashboardId = dashboard[0].id_dashboard;
+    // Requête pour récupérer les annonces qui appartiennent à ce dashboard
+    const [annonces] = await connection.query("SELECT * FROM annonce WHERE id_dashboard = ?", [dashboardId]);
+
+    // Vérifier si des annonces ont été trouvées
+    if (annonces.length === 0) {
+      return res.status(404).json({ message: "Aucune annonce trouvée pour ce dashboard" });
+    }
+
+    //Passer les annonces à la vue dashboard.handlebars
     res.render("dashboard", {
       title: "Dashboard",
       annonces: annonces // On passe les annonces ici
@@ -169,18 +189,18 @@ app.get("/dashboard", async (req, res) => {
 
 
 
-app.get('/upload', (req, res) =>{
+app.get('/upload', (req, res) => {
   res.render("upload", {})
 })
 
 
-app.post("/upload", async (req, res) =>{
+app.post("/upload", async (req, res) => {
 
-  if(currentUser = ""){
+  if (currentUser = "") {
     res.redirect("/connection")
   }
 
-  const {titre, adresse, description, lien} = req.body;
+  const { titre, adresse, description, lien } = req.body;
 
   if (!titre) {
     return res.status(400).json({ message: "Tous les champs sont requis" });
@@ -191,10 +211,10 @@ app.post("/upload", async (req, res) =>{
 
     // Insérer l'annonce dans la base de donnée
     const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = (?)",
-    [currentUser])
+      [currentUser])
     const result = await connection.query(
       "INSERT INTO annonce (id_dashboard, titre, date, adresse, description) VALUES (?, ?, ?, ?, ?)",
-      [dashboard[0].id_dashboard,titre,adresse,description,lien]
+      [dashboard[0].id_dashboard, titre, adresse, description, lien]
     );
 
     // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
