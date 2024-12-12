@@ -62,19 +62,19 @@ app.post("/connection", async (req, res) => {
 
     // Requête SQL pour vérifier le pseudo et récupérer le mot de passe
     const [rows] = await connection.query(
-      "SELECT mdp FROM `utilisateur` WHERE pseudo = ?",
+      "SELECT pseudo, mdp FROM `utilisateur` WHERE pseudo = ?",
       [pseudo]
     );
-
+    console.log(rows[0].pseudo);
     if (rows.length > 0) {
       // Si un utilisateur est trouvé avec ce pseudo, on récupère le mot de passe
       const password = rows[0].mdp;
-      console.log(password);  // Affichage du mot de passe récupéré
+      //console.log(password);  // Affichage du mot de passe récupéré
 
       // Ici, vous pouvez vérifier si le mot de passe est correct
       // Par exemple, comparer mdp avec celui dans la base (en clair ou en utilisant bcrypt)
       if (password === mdp) {
-        res.redirect("/");  // Rediriger vers la page d'accueil si la connexion est réussie
+        res.redirect("/dashboard");  // Rediriger vers la page d'accueil si la connexion est réussie
       } else {
         res.status(401).send("Mot de passe incorrect");
       }
@@ -168,6 +168,44 @@ app.get("/dashboard", async (req, res) => {
 });
 
 
+
+app.get('/upload', (req, res) =>{
+  res.render("upload", {})
+})
+
+
+app.post("/upload", async (req, res) =>{
+
+  if(currentUser = ""){
+    res.redirect("/connection")
+  }
+
+  const {titre, adresse, description, lien} = req.body;
+
+  if (!titre) {
+    return res.status(400).json({ message: "Tous les champs sont requis" });
+  }
+
+  try {
+    const connection = await initialiseDatabase();
+
+    // Insérer l'annonce dans la base de donnée
+    const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = (?)",
+    [currentUser])
+    const result = await connection.query(
+      "INSERT INTO annonce (id_dashboard, titre, date, adresse, description) VALUES (?, ?, ?, ?, ?)",
+      [dashboard[0].id_dashboard,titre,adresse,description,lien]
+    );
+
+    // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("Erreur lors de l'ajout de l'annonce  : ", err);
+    res.status(500).json({ message: "Erreur lors de l'ajout d'une annonce" });
+  }
+
+
+})
 
 
 
