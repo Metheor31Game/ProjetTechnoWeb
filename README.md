@@ -55,23 +55,23 @@
 
 checklist eval fin 1er semestre :
 
-    [ ] Dépôt Git avec historique
-    [ ] package.json avec dépendances et scripts
-    [ ] Serveur express qui se lance
-    [ ] GET en 200
-    [ ] POST avec réponse 200 ou 201
-    [ ] Base de données qui tourne
-    [ ] Le GET /elements renvoie une liste
-    [ ] Le GET /elements/un-id renvoie un élément en détail
-    [ ] le POST /elements ajoute des données à la base de données
+    [ V ] Dépôt Git avec historique
+    [ V ] package.json avec dépendances et scripts
+    [ V ] Serveur express qui se lance
+    [ V ] Base de données qui tourne
+    [ V ] Le GET /elements renvoie une liste
+    [ V ] Le GET /elements/un-id renvoie un élément en détail
+    [ V ] le POST /elements ajoute des données à la base de données
+    [ V ] DELETE /elements/un-id qui supprime un enregistrement
+    [ V ] Présence d’un mécanisme d’authentification
+    [ V ] Possibilité de créer un compte utilisateur de compte
+    [ V ] Historique des commits clairs (qui a changé quoi quand)
     [ ] PUT ou PATCH /elements/un-id qui l’enregistrement
-    [ ] DELETE /elements/un-id qui supprime un enregistrement
-    [ ] 404 en cas de route inconnue et en cas d’enregistrement inconnu
     [ ] Présence d’un test unitaire pertinent
     [ ] Présence d’un test end-to-end pertinent
-    [ ] Présence d’un mécanisme d’authentification
-    [ ] Possibilité de créer un compte utilisateur de compte
-    [ ] 401 en cas d’accès non authentifié
     [ ] Organisation du code en fichiers logiquement séparés
-    [ ] Historique des commits clairs (qui a changé quoi quand)
     [ ] Gestion des autorisations et 403 en cas de d’accès à la ressource d’un tiers
+    [ ] POST avec réponse 200 ou 201
+    [ ] 401 en cas d’accès non authentifié
+    [ ] 404 en cas de route inconnue et en cas d’enregistrement inconnu
+    [ ] GET en 200

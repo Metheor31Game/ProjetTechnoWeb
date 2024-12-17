@@ -41,24 +41,37 @@ app.get("/", (req, res) => {
   });
 });
 
-// Route pour récupérer les données
-app.get("/data", async (req, res) => {
+// Route pour récupérer les annonces
+app.get("/elements/:id?", async (req, res) => {
   let connection = await initialiseDatabase();
   if (!connection) {
     return res.status(500).json({ message: "Erreur de connexion à la base de données" });
   }
 
   try {
-    // Effectuer la requête pour récupérer tous les utilisateurs
-    const [rows] = await connection.query("SELECT * FROM utilisateur");
+    const annonceId = req.params.id; // Récupérer le paramètre "id" (peut être undefined)
 
-    // Envoyer les données sous forme de JSON
-    res.json(rows);
+    if (annonceId) {
+      // Si un ID est fourni, récupérer uniquement cette annonce
+      const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "Annonce non trouvée" });
+      }
+
+      res.json(rows[0]); // Retourner l'annonce correspondante
+    } else {
+      // Si aucun ID n'est fourni, récupérer toutes les annonces
+      const [rows] = await connection.query("SELECT * FROM annonce");
+      res.json(rows); // Retourner toutes les annonces
+    }
   } catch (err) {
     console.error("Erreur lors de la récupération des données : ", err);
     res.status(500).json({ message: "Erreur interne du serveur" });
   }
 });
+
+
 
 // Route pour se connecter (GET)
 app.get("/connection", (req, res) => {
