@@ -113,7 +113,6 @@ app.get("/logout", (req, res) => {
   });
 });
 
-
 // Route pour s'inscrire
 app.get("/inscription", (req, res) => {
   return res.render("inscription", {});
@@ -137,6 +136,12 @@ app.post("/inscription", async (req, res) => {
     const result = await connection.query(
       "INSERT INTO utilisateur (pseudo, nom, prenom, mail, mdp) VALUES (?, ?, ?, ?, ?)",
       [pseudo, nom, prenom, mail, hashedPassword]
+    );
+
+    // Insérer un dashboard lors de l'inscription
+    const dashboard = await connection.query(
+      "INSERT INTO dashboard (pseudo_user) VALUES (?)",
+      [pseudo]
     );
 
     res.redirect("/connection");
@@ -253,8 +258,6 @@ app.post("/upload", async (req, res) => {
     console.error("Erreur lors de l'ajout de l'annonce  : ", err);
     res.status(500).json({ message: "Erreur lors de l'ajout d'une annonce" });
   }
-
-
 })
 
 function deleteSelected() {
