@@ -1,6 +1,8 @@
 const express = require("express");
-const { engine } = require("express-handlebars");
 const path = require("path");
+const session = require('express-session');
+const bcrypt = require('bcrypt');
+const { engine } = require("express-handlebars");
 const { initialiseDatabase, closeDatabase, connection } = require("./bdd"); // Importer `connection`
 const { log } = require("console");
 
@@ -15,6 +17,18 @@ app.set("views", path.join(__dirname, "../public/views"));
 app.use(express.urlencoded({ extended: true })); // Pour les formulaires classiques
 app.use(express.json()); // Pour les données JSON
 app.use(express.static("public"))
+
+app.use(session({
+  secret: 'votre_secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+      httpOnly: true, // Protéger contre les XSS
+      secure: false,  // Activer uniquement si HTTPS est utilisé
+      sameSite: 'lax', // Protection contre CSRF
+      maxAge: 1000 * 60 // 1 jour en millisecondes
+  }
+}));
 
 let currentUser = "";
 
@@ -53,42 +67,50 @@ app.get("/connection", (req, res) => {
 
 // Route pour gérer la connexion (POST)
 app.post("/connection", async (req, res) => {
-  // const { pseudo, mdp } = req.body;
   const pseudo = req.body.pseudo;
   const mdp = req.body.mdp;
-  console.log("pseudo : " + pseudo + "  MDP : " + mdp);
 
   try {
-    // Connexion à la base de données
     const connection = await initialiseDatabase();
-
-    // Requête SQL pour vérifier le pseudo et récupérer le mot de passe
     const [rows] = await connection.query(
       "SELECT pseudo, mdp FROM `utilisateur` WHERE pseudo = ?",
       [pseudo]
     );
-    console.log(rows[0].pseudo);
-    if (rows.length > 0) {
-      // Si un utilisateur est trouvé avec ce pseudo, on récupère le mot de passe
-      const password = rows[0].mdp;
-      //console.log(password);  // Affichage du mot de passe récupéré
 
-      // Ici, vous pouvez vérifier si le mot de passe est correct
-      // Par exemple, comparer mdp avec celui dans la base (en clair ou en utilisant bcrypt)
-      if (password === mdp) {
-        currentUser = pseudo;
-        res.redirect("/dashboard");  // Rediriger vers la page d'accueil si la connexion est réussie
+    if (rows.length > 0) {
+      const storedPassword = rows[0].mdp;
+      const match = await bcrypt.compare(mdp, storedPassword);  // Comparaison des mots de passe hachés
+      if (match) {
+        req.session.user = pseudo;
+        res.redirect("/dashboard");
       } else {
-        res.status(401).send("Mot de passe incorrect");
+        res.status(401)//.send("Mot de passe incorrect");
+        setTimeout(() =>{
+          res.redirect("/connection")
+        }, 1000)
       }
     } else {
-      res.status(404).send("Utilisateur non trouvé");
-    }
 
+      res.status(401)//.send("Utilisateur non trouvé");
+      setTimeout(  () => {
+        res.redirect("/connection")
+      }, 1000)
+
+    }
   } catch (err) {
-    console.error("Problème de connexion : ", err);
+    console.error("Erreur lors de la connexion : ", err);
     res.status(500).send("Erreur lors de la connexion");
   }
+});
+
+// Route pour déconnexion
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send("Erreur lors de la déconnexion");
+    }
+    res.redirect("/connection");  // Redirige l'utilisateur vers la page de connexion après la déconnexion
+  });
 });
 
 
@@ -101,22 +123,22 @@ app.get("/inscription", (req, res) => {
 app.post("/inscription", async (req, res) => {
   const { pseudo, nom, prenom, mail, mdp } = req.body;
 
-  // Validation des données
   if (!pseudo || !nom || !prenom || !mail || !mdp) {
     return res.status(400).json({ message: "Tous les champs sont requis" });
   }
 
   try {
-    // Connexion à la base de données
     const connection = await initialiseDatabase();
+    const hashedPassword = await bcrypt.hash(mdp, 10);  // Hachage du mot de passe
+
+    console.log("longueur : "+hashedPassword.length);
 
     // Insérer l'utilisateur dans la base de données
     const result = await connection.query(
       "INSERT INTO utilisateur (pseudo, nom, prenom, mail, mdp) VALUES (?, ?, ?, ?, ?)",
-      [pseudo, nom, prenom, mail, mdp]
+      [pseudo, nom, prenom, mail, hashedPassword]
     );
 
-    // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
     res.redirect("/connection");
   } catch (err) {
     console.error("Erreur lors de l'inscription : ", err);
@@ -127,46 +149,41 @@ app.post("/inscription", async (req, res) => {
 
 //Route pour son dashboard
 app.get("/dashboard", async (req, res) => {
-  if (currentUser == "") {
+  if (!req.session.user) {  // Vérifie si un utilisateur est connecté
     return res.redirect("/connection");
-
   }
-  console.log("ICIIIIIIIIIIIIIIIIIIIIII + " + currentUser)
+
+  const currentUser = req.session.user;  // Récupère le pseudo de l'utilisateur depuis la session
+  console.log("Utilisateur connecté : " + currentUser);
+
   let connection = await initialiseDatabase();
   if (!connection) {
     return res.status(500).json({ message: "Erreur de connexion à la base de données" });
   }
 
   try {
-
-    // Requête pour obtenir l'ID du dashboard basé sur le pseudo
     const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = ?", [currentUser]);
 
-    // Vérifier si l'ID du dashboard existe
-    if (!dashboard[0].id_dashboard) {
+    if (!dashboard[0]?.id_dashboard) {
       return res.status(404).json({ message: "Dashboard introuvable" });
     }
 
     const dashboardId = dashboard[0].id_dashboard;
-    // Requête pour récupérer les annonces qui appartiennent à ce dashboard
     const [annonces] = await connection.query("SELECT * FROM annonce WHERE id_dashboard = ?", [dashboardId]);
 
-    // Vérifier si des annonces ont été trouvées
     if (annonces.length === 0) {
       return res.status(404).json({ message: "Aucune annonce trouvée pour ce dashboard" });
     }
 
-    //Passer les annonces à la vue dashboard.handlebars
     res.render("dashboard", {
       title: "Dashboard",
-      annonces: annonces // On passe les annonces ici
+      annonces: annonces
     });
   } catch (err) {
     console.error("Erreur lors de la récupération des annonces : ", err);
     res.status(500).json({ message: "Erreur interne du serveur" });
   }
 });
-
 
 
 app.get('/upload', (req, res) => {
