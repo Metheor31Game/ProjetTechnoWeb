@@ -1,3 +1,7 @@
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+// - - - - - - - - - LES IMPORTS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
 const express = require("express");
 const path = require("path");
 const session = require('express-session');
@@ -8,6 +12,10 @@ const { log } = require("console");
 
 const app = express();
 const port = 3000;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+// - - - - - - - - - MIDDLEWARE  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 // Configuration du moteur de template Handlebars
 app.engine("handlebars", engine());
@@ -30,8 +38,9 @@ app.use(session({
   }
 }));
 
-let currentUser = "";
-
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+// - - - - - - - - - LES ROUTES  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 // Route principale
 app.get("/", (req, res) => {
@@ -41,37 +50,43 @@ app.get("/", (req, res) => {
   });
 });
 
-// Route pour récupérer les annonces
-app.get("/elements/:id?", async (req, res) => {
-  let connection = await initialiseDatabase();
-  if (!connection) {
-    return res.status(500).json({ message: "Erreur de connexion à la base de données" });
+// Route pour s'inscrire
+app.get("/inscription", (req, res) => {
+  return res.render("inscription", {});
+});
+
+// Route pour gérer l'inscription (POST)
+app.post("/inscription", async (req, res) => {
+  const { pseudo, nom, prenom, mail, mdp } = req.body;
+
+  if (!pseudo || !nom || !prenom || !mail || !mdp) {
+    return res.status(400).json({ message: "Tous les champs sont requis" });
   }
 
   try {
-    const annonceId = req.params.id; // Récupérer le paramètre "id" (peut être undefined)
+    const connection = await initialiseDatabase();
+    const hashedPassword = await bcrypt.hash(mdp, 10);  // Hachage du mot de passe
 
-    if (annonceId) {
-      // Si un ID est fourni, récupérer uniquement cette annonce
-      const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+    console.log("longueur : "+hashedPassword.length);
 
-      if (rows.length === 0) {
-        return res.status(404).json({ message: "Annonce non trouvée" });
-      }
+    // Insérer l'utilisateur dans la base de données
+    const result = await connection.query(
+      "INSERT INTO utilisateur (pseudo, nom, prenom, mail, mdp) VALUES (?, ?, ?, ?, ?)",
+      [pseudo, nom, prenom, mail, hashedPassword]
+    );
 
-      res.json(rows[0]); // Retourner l'annonce correspondante
-    } else {
-      // Si aucun ID n'est fourni, récupérer toutes les annonces
-      const [rows] = await connection.query("SELECT * FROM annonce");
-      res.json(rows); // Retourner toutes les annonces
-    }
+    // Insérer un dashboard lors de l'inscription
+    const dashboard = await connection.query(
+      "INSERT INTO dashboard (pseudo_user) VALUES (?)",
+      [pseudo]
+    );
+
+    res.redirect("/connection");
   } catch (err) {
-    console.error("Erreur lors de la récupération des données : ", err);
-    res.status(500).json({ message: "Erreur interne du serveur" });
+    console.error("Erreur lors de l'inscription : ", err);
+    res.status(500).json({ message: "Erreur lors de l'inscription" });
   }
 });
-
-
 
 // Route pour se connecter (GET)
 app.get("/connection", (req, res) => {
@@ -126,46 +141,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// Route pour s'inscrire
-app.get("/inscription", (req, res) => {
-  return res.render("inscription", {});
-});
-
-// Route pour gérer l'inscription (POST)
-app.post("/inscription", async (req, res) => {
-  const { pseudo, nom, prenom, mail, mdp } = req.body;
-
-  if (!pseudo || !nom || !prenom || !mail || !mdp) {
-    return res.status(400).json({ message: "Tous les champs sont requis" });
-  }
-
-  try {
-    const connection = await initialiseDatabase();
-    const hashedPassword = await bcrypt.hash(mdp, 10);  // Hachage du mot de passe
-
-    console.log("longueur : "+hashedPassword.length);
-
-    // Insérer l'utilisateur dans la base de données
-    const result = await connection.query(
-      "INSERT INTO utilisateur (pseudo, nom, prenom, mail, mdp) VALUES (?, ?, ?, ?, ?)",
-      [pseudo, nom, prenom, mail, hashedPassword]
-    );
-
-    // Insérer un dashboard lors de l'inscription
-    const dashboard = await connection.query(
-      "INSERT INTO dashboard (pseudo_user) VALUES (?)",
-      [pseudo]
-    );
-
-    res.redirect("/connection");
-  } catch (err) {
-    console.error("Erreur lors de l'inscription : ", err);
-    res.status(500).json({ message: "Erreur lors de l'inscription" });
-  }
-});
-
-
-//Route pour son dashboard
+// Route pour son dashboard
 app.get("/dashboard", async (req, res) => {
   if (!req.session.user) {  // Vérifie si un utilisateur est connecté
     return res.redirect("/connection");
@@ -203,39 +179,35 @@ app.get("/dashboard", async (req, res) => {
   }
 });
 
-// Route pour afficher les détails d'une annonce
-app.get("/annonce/details", async (req, res) => {
-  const annonceId = req.query.id; // Récupérer l'ID de l'annonce dans l'URL
-
-  if (!annonceId) {
-    return res.status(400).json({ message: "ID de l'annonce manquant" });
+// Route pour récupérer les annonces
+app.get("/elements/:id?", async (req, res) => {
+  let connection = await initialiseDatabase();
+  if (!connection) {
+    return res.status(500).json({ message: "Erreur de connexion à la base de données" });
   }
 
-  if (!req.session.user) {
-    res.redirect("/connection");
-  }
   try {
-    const connection = await initialiseDatabase();
+    const annonceId = req.params.id; // Récupérer le paramètre "id" (peut être undefined)
 
-    // Requête pour récupérer les détails de l'annonce
-    const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+    if (annonceId) {
+      // Si un ID est fourni, récupérer uniquement cette annonce
+      const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Annonce introuvable" });
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "Annonce non trouvée" });
+      }
+
+      res.json(rows[0]); // Retourner l'annonce correspondante
+    } else {
+      // Si aucun ID n'est fourni, récupérer toutes les annonces
+      const [rows] = await connection.query("SELECT * FROM annonce");
+      res.json(rows); // Retourner toutes les annonces
     }
-
-    // Afficher les détails de l'annonce dans une vue spécifique
-    res.render("annonces", {
-      title: "Détails de l'annonce",
-      annonce: rows[0],
-    });
   } catch (err) {
-    console.error("Erreur lors de la récupération des détails de l'annonce : ", err);
+    console.error("Erreur lors de la récupération des données : ", err);
     res.status(500).json({ message: "Erreur interne du serveur" });
   }
 });
-
-
 
 app.get('/upload', (req, res) => {
   if (!req.session.user) {
@@ -304,6 +276,41 @@ app.get("/delete", async (req, res) => {
   }
 });
 
+// Route pour afficher les détails d'une annonce
+app.get("/annonce/details", async (req, res) => {
+  const annonceId = req.query.id; // Récupérer l'ID de l'annonce dans l'URL
+
+  if (!annonceId) {
+    return res.status(400).json({ message: "ID de l'annonce manquant" });
+  }
+
+  if (!req.session.user) {
+    res.redirect("/connection");
+  }
+  try {
+    const connection = await initialiseDatabase();
+
+    // Requête pour récupérer les détails de l'annonce
+    const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Annonce introuvable" });
+    }
+
+    // Afficher les détails de l'annonce dans une vue spécifique
+    res.render("annonces", {
+      title: "Détails de l'annonce",
+      annonce: rows[0],
+    });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des détails de l'annonce : ", err);
+    res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+// - - - - - - - - - INITIALISATION DE LA DATABASE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 // Lancer la base de données et le serveur
 initialiseDatabase()

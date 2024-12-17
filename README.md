@@ -66,10 +66,11 @@ checklist eval fin 1er semestre :
     [ V ] Présence d’un mécanisme d’authentification
     [ V ] Possibilité de créer un compte utilisateur de compte
     [ V ] Historique des commits clairs (qui a changé quoi quand)
+    [ V ] Organisation du code en fichiers logiquement séparés
+    
     [ ] PUT ou PATCH /elements/un-id qui l’enregistrement
     [ ] Présence d’un test unitaire pertinent
     [ ] Présence d’un test end-to-end pertinent
-    [ ] Organisation du code en fichiers logiquement séparés
     [ ] Gestion des autorisations et 403 en cas de d’accès à la ressource d’un tiers
     [ ] POST avec réponse 200 ou 201
     [ ] 401 en cas d’accès non authentifié
