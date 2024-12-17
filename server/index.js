@@ -1,50 +1,55 @@
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-// - - - - - - - - - LES IMPORTS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
+// - - - - - - - - - LES IMPORTS - - - - - - - - - 
 const express = require("express");
 const path = require("path");
-const session = require('express-session');
-const bcrypt = require('bcrypt');
+const session = require("express-session");
+const bcrypt = require("bcrypt");
 const { engine } = require("express-handlebars");
-const { initialiseDatabase, closeDatabase, connection } = require("./bdd"); // Importer `connection`
-const { log } = require("console");
+const { initialiseDatabase, closeDatabase } = require("./bdd");
 
 const app = express();
 const port = 3000;
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-// - - - - - - - - - MIDDLEWARE  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+// - - - - - - - - - MIDDLEWARE  - - - - - - - - - 
 
 // Configuration du moteur de template Handlebars
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "../public/views"));
-// Middleware pour parser le corps des requêtes en JSON ou en URL-encoded
 app.use(express.urlencoded({ extended: true })); // Pour les formulaires classiques
 app.use(express.json()); // Pour les données JSON
-app.use(express.static("public"))
+app.use(express.static("public"));
 
-app.use(session({
-  secret: 'votre_secret',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-      httpOnly: true, // Protéger contre les XSS
-      secure: false,  // Activer uniquement si HTTPS est utilisé
-      sameSite: 'lax', // Protection contre CSRF
-      maxAge: 1000 * 60 * 60 // 1 jour en millisecondes
+// Gestion des sessions
+app.use(
+  session({
+    secret: "votre_secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60, // 1 heure
+    },
+  })
+);
+
+// - - - - - - - - - LES ROUTES  - - - - - - - - - 
+
+// Middleware pour vérifier si un utilisateur est connecté
+const requireAuth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: "Non authentifié. Veuillez vous connecter." });
   }
-}));
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-// - - - - - - - - - LES ROUTES  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  next();
+};
 
 // Route principale
 app.get("/", (req, res) => {
-  res.render("home", {
+  if (req.session.user) {
+    res.status(200).redirect("/dashboard");
+  }
+  res.status(200).render("home", {
     title: "Bienvenue",
     description: "Ceci est un site internet qui utilise handlebars",
   });
@@ -52,7 +57,7 @@ app.get("/", (req, res) => {
 
 // Route pour s'inscrire
 app.get("/inscription", (req, res) => {
-  return res.render("inscription", {});
+  res.status(200).render("inscription", {});
 });
 
 // Route pour gérer l'inscription (POST)
@@ -60,164 +65,176 @@ app.post("/inscription", async (req, res) => {
   const { pseudo, nom, prenom, mail, mdp } = req.body;
 
   if (!pseudo || !nom || !prenom || !mail || !mdp) {
-    return res.status(400).json({ message: "Tous les champs sont requis" });
+    return res.status(400).json({ message: "Tous les champs sont requis." });
   }
 
   try {
     const connection = await initialiseDatabase();
-    const hashedPassword = await bcrypt.hash(mdp, 10);  // Hachage du mot de passe
+    const hashedPassword = await bcrypt.hash(mdp, 10);
 
-    console.log("longueur : "+hashedPassword.length);
-
-    // Insérer l'utilisateur dans la base de données
-    const result = await connection.query(
+    await connection.query(
       "INSERT INTO utilisateur (pseudo, nom, prenom, mail, mdp) VALUES (?, ?, ?, ?, ?)",
       [pseudo, nom, prenom, mail, hashedPassword]
     );
 
-    // Insérer un dashboard lors de l'inscription
-    const dashboard = await connection.query(
-      "INSERT INTO dashboard (pseudo_user) VALUES (?)",
-      [pseudo]
-    );
+    await connection.query("INSERT INTO dashboard (pseudo_user) VALUES (?)", [pseudo]);
 
-    res.redirect("/connection");
+    res.status(201).redirect("/connection");
   } catch (err) {
-    console.error("Erreur lors de l'inscription : ", err);
-    res.status(500).json({ message: "Erreur lors de l'inscription" });
+    console.error("Erreur lors de l'inscription :", err);
+    res.status(500).json({ message: "Erreur lors de l'inscription." });
   }
 });
 
-// Route pour se connecter (GET)
+// Route pour se connecter
 app.get("/connection", (req, res) => {
-  return res.render("connection", {});
+  res.status(200).render("connection", {});
 });
 
 // Route pour gérer la connexion (POST)
 app.post("/connection", async (req, res) => {
-  const pseudo = req.body.pseudo;
-  const mdp = req.body.mdp;
+  const { pseudo, mdp } = req.body;
 
   try {
     const connection = await initialiseDatabase();
     const [rows] = await connection.query(
-      "SELECT pseudo, mdp FROM `utilisateur` WHERE pseudo = ?",
+      "SELECT pseudo, mdp FROM utilisateur WHERE pseudo = ?",
       [pseudo]
     );
 
     if (rows.length > 0) {
-      const storedPassword = rows[0].mdp;
-      const match = await bcrypt.compare(mdp, storedPassword);  // Comparaison des mots de passe hachés
+      const match = await bcrypt.compare(mdp, rows[0].mdp);
       if (match) {
         req.session.user = pseudo;
-        res.redirect("/dashboard");
+        return res.status(200).redirect("/dashboard");
       } else {
-        res.status(401)//.send("Mot de passe incorrect");
-        setTimeout(() =>{
-          res.redirect("/connection")
-        }, 1000)
+        return res.status(401).render("connection", { message: "Mot de passe incorrect." });
       }
     } else {
-
-      res.status(401)//.send("Utilisateur non trouvé");
-      setTimeout(  () => {
-        res.redirect("/connection")
-      }, 1000)
-
+      return res.status(404).render("connection", { message: "Utilisateur non trouvé." });
     }
   } catch (err) {
-    console.error("Erreur lors de la connexion : ", err);
-    res.status(500).send("Erreur lors de la connexion");
+    console.error("Erreur lors de la connexion :", err);
+    res.status(500).json({ message: "Erreur lors de la connexion." });
   }
 });
 
-// Route pour déconnexion
+// Route pour se déconnecter
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).send("Erreur lors de la déconnexion");
+      return res.status(500).json({ message: "Erreur lors de la déconnexion." });
     }
-    res.redirect("/connection");  // Redirige l'utilisateur vers la page de connexion après la déconnexion
+    res.redirect("/connection");
   });
 });
 
-// Route pour son dashboard
-app.get("/dashboard", async (req, res) => {
-  if (!req.session.user) {  // Vérifie si un utilisateur est connecté
-    return res.redirect("/connection");
-  }
-
-  const currentUser = req.session.user;  // Récupère le pseudo de l'utilisateur depuis la session
-  console.log("Utilisateur connecté : " + currentUser);
-
-  let connection = await initialiseDatabase();
-  if (!connection) {
-    return res.status(500).json({ message: "Erreur de connexion à la base de données" });
-  }
+// Route pour le dashboard
+app.get("/dashboard", requireAuth, async (req, res) => {
+  const currentUser = req.session.user;
 
   try {
-    const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = ?", [currentUser]);
+    const connection = await initialiseDatabase();
+    const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = ?", [
+      currentUser,
+    ]);
 
     if (!dashboard[0]?.id_dashboard) {
-      return res.status(404).json({ message: "Dashboard introuvable" });
+      return res.status(404).json({ message: "Dashboard introuvable." });
     }
 
-    const dashboardId = dashboard[0].id_dashboard;
-    const [annonces] = await connection.query("SELECT * FROM annonce WHERE id_dashboard = ?", [dashboardId]);
+    const [annonces] = await connection.query("SELECT * FROM annonce WHERE id_dashboard = ?", [
+      dashboard[0].id_dashboard,
+    ]);
 
-    // if (annonces.length === 0) {
-    //   return res.status(404).json({ message: "Aucune annonce trouvée pour ce dashboard" });
-    // }
-
-    res.render("dashboard", {
+    res.status(200).render("dashboard", {
       title: "Dashboard",
-      annonces: annonces
+      annonces,
     });
   } catch (err) {
-    console.error("Erreur lors de la récupération des annonces : ", err);
-    res.status(500).json({ message: "Erreur interne du serveur" });
+    console.error("Erreur lors de la récupération des annonces :", err);
+    res.status(500).json({ message: "Erreur interne du serveur." });
   }
 });
 
 // Route pour récupérer les annonces
 app.get("/elements/:id?", async (req, res) => {
-  let connection = await initialiseDatabase();
-  if (!connection) {
-    return res.status(500).json({ message: "Erreur de connexion à la base de données" });
-  }
-
   try {
-    const annonceId = req.params.id; // Récupérer le paramètre "id" (peut être undefined)
+    const connection = await initialiseDatabase();
+    const annonceId = req.params.id;
 
     if (annonceId) {
-      // Si un ID est fourni, récupérer uniquement cette annonce
       const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
-
       if (rows.length === 0) {
-        return res.status(404).json({ message: "Annonce non trouvée" });
+        return res.status(404).json({ message: "Annonce non trouvée." });
       }
-
-      res.json(rows[0]); // Retourner l'annonce correspondante
+      res.status(200).json(rows[0]);
     } else {
-      // Si aucun ID n'est fourni, récupérer toutes les annonces
       const [rows] = await connection.query("SELECT * FROM annonce");
-      res.json(rows); // Retourner toutes les annonces
+      res.status(200).json(rows);
     }
   } catch (err) {
-    console.error("Erreur lors de la récupération des données : ", err);
-    res.status(500).json({ message: "Erreur interne du serveur" });
+    console.error("Erreur lors de la récupération des annonces :", err);
+    res.status(500).json({ message: "Erreur interne du serveur." });
   }
 });
 
-app.get('/upload', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect("/connection")
+// Route pour supprimer des annonces
+app.get("/delete", requireAuth, async (req, res) => {
+  const ids = req.query.ids;
+
+  if (!ids) {
+    return res.status(400).json({ message: "Aucun ID fourni pour suppression." });
   }
+
+  const idArray = ids.split(",");
+
+  try {
+    const connection = await initialiseDatabase();
+    const placeholders = idArray.map(() => "?").join(",");
+    const query = `DELETE FROM annonce WHERE id IN (${placeholders})`;
+
+    await connection.query(query, idArray);
+
+    res.status(200).redirect("/dashboard");
+  } catch (err) {
+    console.error("Erreur lors de la suppression des annonces :", err);
+    res.status(500).json({ message: "Erreur lors de la suppression des annonces." });
+  }
+});
+
+// Route pour afficher les détails d'une annonce
+app.get("/annonce/details", requireAuth, async (req, res) => {
+  const annonceId = req.query.id;
+
+  if (!annonceId) {
+    return res.status(400).json({ message: "ID de l'annonce manquant." });
+  }
+
+  try {
+    const connection = await initialiseDatabase();
+    const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Annonce introuvable." });
+    }
+
+    res.status(200).render("annonces", {
+      title: "Détails de l'annonce",
+      annonce: rows[0],
+    });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des détails de l'annonce :", err);
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+});
+
+app.get('/upload', requireAuth, (req, res) => {
   res.render("upload", {})
 })
 
 
-app.post("/upload", async (req, res) => {
+app.post("/upload", requireAuth, async (req, res) => {
 
 
   const { titre, adresse, description, lien } = req.body;
@@ -245,74 +262,13 @@ app.post("/upload", async (req, res) => {
   }
 })
 
-app.get("/delete", async (req, res) => {
-  
-  if (!req.session.user) {
-    return res.redirect("/connection");
-  }
-
-  const ids = req.query.ids; // Récupérer les IDs dans les paramètres de l'URL
-  if (!ids) {
-    return res.status(400).json({ message: "Aucun ID fourni pour suppression." });
-  }
-
-  // Diviser les IDs en tableau en utilisant le séparateur
-  const idArray = ids.split(",");
-
-  try {
-    const connection = await initialiseDatabase();
-
-    // Supprimer les annonces avec les IDs spécifiés
-    const placeholders = idArray.map(() => "?").join(","); // Générer des placeholders "?, ?, ?"
-    const query = `DELETE FROM annonce WHERE id IN (${placeholders})`;
-
-    await connection.query(query, idArray);
-
-    // Rediriger vers le dashboard après suppression
-    res.redirect("/dashboard");
-  } catch (err) {
-    console.error("Erreur lors de la suppression des annonces :", err);
-    res.status(500).json({ message: "Erreur lors de la suppression des annonces." });
-  }
+// Route inconnue
+app.use((req, res) => {
+  res.status(404).json({ message: "Route introuvable." });
 });
 
-// Route pour afficher les détails d'une annonce
-app.get("/annonce/details", async (req, res) => {
-  const annonceId = req.query.id; // Récupérer l'ID de l'annonce dans l'URL
+// - - - - - - - - - INITIALISATION DE LA DATABASE - - - - - - - - - 
 
-  if (!annonceId) {
-    return res.status(400).json({ message: "ID de l'annonce manquant" });
-  }
-
-  if (!req.session.user) {
-    res.redirect("/connection");
-  }
-  try {
-    const connection = await initialiseDatabase();
-
-    // Requête pour récupérer les détails de l'annonce
-    const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Annonce introuvable" });
-    }
-
-    // Afficher les détails de l'annonce dans une vue spécifique
-    res.render("annonces", {
-      title: "Détails de l'annonce",
-      annonce: rows[0],
-    });
-  } catch (err) {
-    console.error("Erreur lors de la récupération des détails de l'annonce : ", err);
-    res.status(500).json({ message: "Erreur interne du serveur" });
-  }
-});
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-// - - - - - - - - - INITIALISATION DE LA DATABASE - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-// Lancer la base de données et le serveur
 initialiseDatabase()
   .then(() => {
     app.listen(port, () => {
@@ -320,10 +276,9 @@ initialiseDatabase()
     });
   })
   .catch((err) => {
-    console.error("Erreur lors de l'initialisation de la DATABASE : ", err);
+    console.error("Erreur lors de l'initialisation de la DATABASE :", err);
   });
 
-// Fermeture propre de la base de données lors de l'arrêt du serveur
 process.on("SIGINT", async () => {
   console.log("Arrêt du serveur...");
   await closeDatabase();
