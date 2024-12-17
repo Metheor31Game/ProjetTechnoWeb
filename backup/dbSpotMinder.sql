@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : db
--- Généré le : jeu. 12 déc. 2024 à 10:44
+-- Généré le : mar. 17 déc. 2024 à 15:37
 -- Version du serveur : 8.0.40
 -- Version de PHP : 8.2.8
 
@@ -44,8 +44,12 @@ CREATE TABLE `annonce` (
 INSERT INTO `annonce` (`id`, `id_dashboard`, `titre`, `date`, `adresse`, `description`, `lien`) VALUES
 (1, 1, 'Appartement 3 pièces à louer', '2024-12-01', '12 Rue de la République, Lyon, 69001', 'Bel appartement de 3 pièces avec un grand séjour et une cuisine équipée.', ''),
 (2, 1, 'Maison avec jardin', '2024-12-05', '45 Avenue des Champs-Élysées, Paris, 75008', 'Grande maison de 5 chambres avec un jardin spacieux et un garage', ''),
-(3, 1, 'Studio à vendre', '2024-11-28', '78 Boulevard Saint-Germain, Paris, 75005', 'Studio de 30m² idéalement situé dans le quartier latin, parfait pour un investisseur.', ''),
-(4, 1, 'Super Maison avec PC GAMER', '26 rue du PC GAMER', 'Une super maison avec un PC GAMER ENORME', 'https://www.bigmaisonavecbigpc.fr', NULL);
+(4, 1, 'Super Maison avec PC GAMER', '26 rue du PC GAMER', 'Une super maison avec un PC GAMER ENORME', 'https://www.bigmaisonavecbigpc.fr', NULL),
+(5, 6, 'un titre', 'une adresse', 'c\'est une description de test visant à tester l\'ajout d\'une annonce.', 'www.leliendelannonce.fr', NULL),
+(6, 6, 'la maison de matheo', 'là ou habite mathéo', 'la belle maison de mathéo', 'www.matheohomestandingtahlesouf.fr', NULL),
+(7, 7, 'maison centre albi', 'place du vigan', 'une bete de maison', '', NULL),
+(8, 7, 'maison a coté du stade', 'Stade lagrèze', 'maison chill beaucoup de pièces', '', NULL),
+(9, 7, 'appartement + rooftop', 'puygouzon', 'bete d\'appart + ascenceur direct dans le salon', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -63,10 +67,11 @@ CREATE TABLE `dashboard` (
 --
 
 INSERT INTO `dashboard` (`id_dashboard`, `pseudo_user`) VALUES
-(1, 'Armand66'),
-(2, 'Clem12'),
-(3, 'Matheo31'),
-(4, 'Thibault81');
+(9, 'armand'),
+(1, 'clement'),
+(7, 'matheo'),
+(6, 'test'),
+(8, 'thibault');
 
 -- --------------------------------------------------------
 
@@ -79,7 +84,7 @@ CREATE TABLE `utilisateur` (
   `nom` varchar(20) NOT NULL COMMENT 'nom',
   `prenom` varchar(20) NOT NULL COMMENT 'prenom',
   `mail` varchar(60) NOT NULL COMMENT 'adresse email',
-  `mdp` varchar(30) NOT NULL
+  `mdp` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -87,10 +92,11 @@ CREATE TABLE `utilisateur` (
 --
 
 INSERT INTO `utilisateur` (`pseudo`, `nom`, `prenom`, `mail`, `mdp`) VALUES
-('Armand66', 'Lecourt', 'Armand', 'armand@exemple.test', 'armandlol'),
-('Clem12', 'Bessieres', 'Clement', 'contact.clementbessieres@gmail.com', 'clemclem'),
-('Matheo31', 'Vigneres', 'Matheo', 'matheo.vigneres@gmail.com', 'matmat'),
-('Thibault81', 'Malespine', 'Thibault', 'thibault@exemple.test', 'titi81');
+('armand', 'Lecourt', 'Armand', 'armand@example.ex', '$2b$10$8WSfS2o8q1d5GKEQdbzWmuSF7MW9QUu.Ro3jWWKTGvCXYSTSkGMQi'),
+('clement', 'Bessieres', 'Clement', 'clement@example.ex', '$2b$10$nU.VfQcsBI7jE4LDdHrileBYgZNQjhmWfaYHiLQfTci/gSILY.DXO'),
+('matheo', 'Vigneres', 'Matheo', 'matheo@example.ex', '$2b$10$ow8ksvIc.pxvveFpAoXy6O0VwQVkQVxRNiBwyoZMh49XyJc8odadO'),
+('test', 'testnom', 'testprenom', 'test@test.test', '$2b$10$7DxW.EhuKyWO6.quT80oxeZJmb8mWx47n25X4wADK1Vx7h7BmUkEq'),
+('thibault', 'Malespine', 'Thibault', 'thibault@example.ex', '$2b$10$3u2Y/PkZWMXaXZKEEyF3/.53U7eoeKiTQpxcBES7BS655Dj8eT0RK');
 
 --
 -- Index pour les tables déchargées
@@ -126,13 +132,13 @@ ALTER TABLE `utilisateur`
 -- AUTO_INCREMENT pour la table `annonce`
 --
 ALTER TABLE `annonce`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT pour la table `dashboard`
 --
 ALTER TABLE `dashboard`
-  MODIFY `id_dashboard` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_dashboard` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Contraintes pour les tables déchargées

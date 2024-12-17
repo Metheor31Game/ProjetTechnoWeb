@@ -26,7 +26,7 @@ app.use(session({
       httpOnly: true, // Protéger contre les XSS
       secure: false,  // Activer uniquement si HTTPS est utilisé
       sameSite: 'lax', // Protection contre CSRF
-      maxAge: 1000 * 60 // 1 jour en millisecondes
+      maxAge: 1000 * 60 * 60 // 1 jour en millisecondes
   }
 }));
 
@@ -189,9 +189,9 @@ app.get("/dashboard", async (req, res) => {
     const dashboardId = dashboard[0].id_dashboard;
     const [annonces] = await connection.query("SELECT * FROM annonce WHERE id_dashboard = ?", [dashboardId]);
 
-    if (annonces.length === 0) {
-      return res.status(404).json({ message: "Aucune annonce trouvée pour ce dashboard" });
-    }
+    // if (annonces.length === 0) {
+    //   return res.status(404).json({ message: "Aucune annonce trouvée pour ce dashboard" });
+    // }
 
     res.render("dashboard", {
       title: "Dashboard",
@@ -238,7 +238,7 @@ app.get("/annonce/details", async (req, res) => {
 
 
 app.get('/upload', (req, res) => {
-  if (currentUser == "") {
+  if (!req.session.user) {
     return res.redirect("/connection")
   }
   res.render("upload", {})
@@ -251,7 +251,7 @@ app.post("/upload", async (req, res) => {
   const { titre, adresse, description, lien } = req.body;
 
   if (!titre) {
-    return res.status(400).json({ message: "Tous les champs sont requis" });
+    return res.status(400).json({ message: "Champ titre requis"});
   }
 
   try {
@@ -259,7 +259,7 @@ app.post("/upload", async (req, res) => {
 
     // Insérer l'annonce dans la base de donnée
     const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = (?)",
-      [currentUser])
+      [req.session.user])
     const result = await connection.query(
       "INSERT INTO annonce (id_dashboard, titre, date, adresse, description) VALUES (?, ?, ?, ?, ?)",
       [dashboard[0].id_dashboard, titre, adresse, description, lien]
@@ -272,29 +272,6 @@ app.post("/upload", async (req, res) => {
     res.status(500).json({ message: "Erreur lors de l'ajout d'une annonce" });
   }
 })
-
-function deleteSelected() {
-  // Récupérer toutes les checkbox sélectionnées
-  const checkboxes = document.querySelectorAll(".annonce-checkbox:checked");
-
-  // Extraire les IDs des annonces sélectionnées
-  const selectedIds = Array.from(checkboxes).map(checkbox => {
-    // L'ID est dans l'attribut `id` de la checkbox, par exemple "checkbox-0"
-    return checkbox.id.split("-")[1];
-  });
-
-  if (selectedIds.length === 0) {
-    alert("Veuillez sélectionner au moins une annonce à supprimer.");
-    return;
-  }
-
-  // Construire l'URL avec les IDs comme paramètres
-  const separator = ","; // Par exemple, utiliser une virgule comme séparateur
-  const url = `/delete?ids=${selectedIds.join(separator)}`;
-
-  // Rediriger vers l'URL
-  location.href = url;
-}
 
 app.get("/delete", async (req, res) => {
   
