@@ -52,3 +52,26 @@
 - Gestion sign in/ log in :
   - utilisation de bcrypt (point fort : anti brutforce + sécurité a mettre dans le site (tentative de connexion))
   - stockage des hash des password dans la base de donnée
+
+checklist eval fin 1er semestre :
+
+    [ ] Dépôt Git avec historique
+    [ ] package.json avec dépendances et scripts
+    [ ] Serveur express qui se lance
+    [ ] GET en 200
+    [ ] POST avec réponse 200 ou 201
+    [ ] Base de données qui tourne
+    [ ] Le GET /elements renvoie une liste
+    [ ] Le GET /elements/un-id renvoie un élément en détail
+    [ ] le POST /elements ajoute des données à la base de données
+    [ ] PUT ou PATCH /elements/un-id qui l’enregistrement
+    [ ] DELETE /elements/un-id qui supprime un enregistrement
+    [ ] 404 en cas de route inconnue et en cas d’enregistrement inconnu
+    [ ] Présence d’un test unitaire pertinent
+    [ ] Présence d’un test end-to-end pertinent
+    [ ] Présence d’un mécanisme d’authentification
+    [ ] Possibilité de créer un compte utilisateur de compte
+    [ ] 401 en cas d’accès non authentifié
+    [ ] Organisation du code en fichiers logiquement séparés
+    [ ] Historique des commits clairs (qui a changé quoi quand)
+    [ ] Gestion des autorisations et 403 en cas de d’accès à la ressource d’un tiers
