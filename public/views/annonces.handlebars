@@ -1,0 +1,13 @@
+{{!-- Inclure le CSS spécifique aux annonces --}}
+<link rel="stylesheet" href="/css/annonce-details.css">
+
+<main>
+  <h1>{{title}}</h1>
+  <div class="annonce-details">
+    <h2>{{annonce.titre}}</h2>
+    <p><strong>Date de mise en ligne :</strong> {{annonce.date}}</p>
+    <p><strong>Adresse :</strong> {{annonce.adresse}}</p>
+    <p><strong>Description :</strong> {{annonce.description}}</p>
+  </div>
+  <button onclick="location.href='/dashboard'">Retour au Dashboard</button>
+</main>

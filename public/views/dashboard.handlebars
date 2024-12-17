@@ -5,8 +5,12 @@
   <h1>{{title}}</h1>
 
   {{#if annonces.length}}
-  <div class="annonces">
+  <div class="boutons"> 
     <button class="upload" id="upload" onclick="location.href='/upload'"> Ajouter une annonce </button>
+    <button class="deconnection" id="deconnection" onclick="location.href='/logout'"> Se déconnecter </button>
+    <button class="delete" id="delete" onclick="deleteSelected()"> Supprimer les annonces sélectionnées </button>
+  </div>
+  <div class="annonces">
     {{#each annonces}}
     <div class="annonce-wrapper">
       <input type="checkbox" id="checkbox-{{@index}}" class="annonce-checkbox">

@@ -185,6 +185,39 @@ app.get("/dashboard", async (req, res) => {
   }
 });
 
+// Route pour afficher les détails d'une annonce
+app.get("/annonce/details", async (req, res) => {
+  const annonceId = req.query.id; // Récupérer l'ID de l'annonce dans l'URL
+
+  if (!annonceId) {
+    return res.status(400).json({ message: "ID de l'annonce manquant" });
+  }
+
+  if (!req.session.user) {
+    res.redirect("/connection");
+  }
+  try {
+    const connection = await initialiseDatabase();
+
+    // Requête pour récupérer les détails de l'annonce
+    const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Annonce introuvable" });
+    }
+
+    // Afficher les détails de l'annonce dans une vue spécifique
+    res.render("annonces", {
+      title: "Détails de l'annonce",
+      annonce: rows[0],
+    });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des détails de l'annonce : ", err);
+    res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+});
+
+
 
 app.get('/upload', (req, res) => {
   if (currentUser == "") {
@@ -223,6 +256,61 @@ app.post("/upload", async (req, res) => {
 
 
 })
+
+function deleteSelected() {
+  // Récupérer toutes les checkbox sélectionnées
+  const checkboxes = document.querySelectorAll(".annonce-checkbox:checked");
+
+  // Extraire les IDs des annonces sélectionnées
+  const selectedIds = Array.from(checkboxes).map(checkbox => {
+    // L'ID est dans l'attribut `id` de la checkbox, par exemple "checkbox-0"
+    return checkbox.id.split("-")[1];
+  });
+
+  if (selectedIds.length === 0) {
+    alert("Veuillez sélectionner au moins une annonce à supprimer.");
+    return;
+  }
+
+  // Construire l'URL avec les IDs comme paramètres
+  const separator = ","; // Par exemple, utiliser une virgule comme séparateur
+  const url = `/delete?ids=${selectedIds.join(separator)}`;
+
+  // Rediriger vers l'URL
+  location.href = url;
+}
+
+app.get("/delete", async (req, res) => {
+  
+  if (!req.session.user) {
+    return res.redirect("/connection");
+  }
+
+  const ids = req.query.ids; // Récupérer les IDs dans les paramètres de l'URL
+  if (!ids) {
+    return res.status(400).json({ message: "Aucun ID fourni pour suppression." });
+  }
+
+  // Diviser les IDs en tableau en utilisant le séparateur
+  const idArray = ids.split(",");
+
+  try {
+    const connection = await initialiseDatabase();
+
+    // Supprimer les annonces avec les IDs spécifiés
+    const placeholders = idArray.map(() => "?").join(","); // Générer des placeholders "?, ?, ?"
+    const query = `DELETE FROM annonce WHERE id IN (${placeholders})`;
+
+    await connection.query(query, idArray);
+
+    // Rediriger vers le dashboard après suppression
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("Erreur lors de la suppression des annonces :", err);
+    res.status(500).json({ message: "Erreur lors de la suppression des annonces." });
+  }
+});
+
 
 // Lancer la base de données et le serveur
 initialiseDatabase()
