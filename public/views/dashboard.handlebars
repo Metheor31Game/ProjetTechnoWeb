@@ -6,12 +6,15 @@
 
   {{#if annonces.length}}
   <div class="annonces">
+    <button class="upload" id="upload" onclick="location.href='/upload'"> Ajouter une annonce </button>
     {{#each annonces}}
-    <div class="annonce" id="annonce-{{@index}}">
-      <h2>{{this.titre}}</h2>
-      <p>Date de mise en ligne : {{this.date}}</p>
-      <p>Adresse : {{this.adresse}} €</p>
-      <p class="description">Description : {{this.description}}</p>
+    <div class="annonce-wrapper">
+      <input type="checkbox" id="checkbox-{{@index}}" class="annonce-checkbox">
+      <button class="annonce" id="annonce-{{@index}}" onclick="location.href='/annonce/details?id={{this.id}}'">
+        <h2>{{this.titre}}</h2>
+        <p>Date de mise en ligne : {{this.date}}</p>
+        <p>Adresse : {{this.adresse}}</p>
+      </button>
     </div>
     {{/each}}
   </div>

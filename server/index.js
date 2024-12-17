@@ -224,11 +224,6 @@ app.post("/upload", async (req, res) => {
 
 })
 
-
-
-
-
-
 // Lancer la base de données et le serveur
 initialiseDatabase()
   .then(() => {

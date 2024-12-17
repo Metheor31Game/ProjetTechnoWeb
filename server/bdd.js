@@ -7,13 +7,6 @@ dotenv.config();
 let connection = null;
 
 async function initialiseDatabase() {
-  // Afficher les variables d'environnement pour vérifier leur lecture
-  // console.log("DB_HOST:", process.env.DB_HOST);
-  // console.log("DB_USER:", process.env.DB_USER);
-  // console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
-  // console.log("DB_NAME:", process.env.DB_NAME);
-  // console.log("DB_PORT:", process.env.DB_PORT);
-
   try {
     // Utilisation des variables d'environnement pour la connexion
     connection = await mysql.createConnection({
@@ -28,7 +21,6 @@ async function initialiseDatabase() {
 
     // Vous pouvez également exécuter une requête simple pour vérifier si la base fonctionne
     const [rows] = await connection.query("SELECT * FROM utilisateur");
-    console.log("Test de requête passé, la base de données répond." + rows);
     return connection;
 
   } catch (err) {
