@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import request from "supertest";
 import { app } from "../server/index";
-// import { initialiseDatabase } from '../server/bdd';
+import { initialiseDatabase } from '../server/bdd';
+import { response } from 'express';
 
 
 
@@ -23,10 +24,21 @@ describe("test des routes -> status (GET) :", () =>{
     const response = await request(app).get("/inscription");
   
     expect(response.status).toBe(200);
+  })  
+})
+
+describe("Test des routes basique (JSON content)", () => {
+  it("route -> /annonces/:id?", async () => {
+
+    const annonceId = "4";
+
+    const connection = await initialiseDatabase();
+
+    const [rows] = await connection.query("SELECT * FROM annonce WHERE id = ?", [annonceId]);
+
+    expect(JSON.stringify(rows[0])).toBe((await (request(app).get("/annonces/4"))).text);
+
   })
-
-
-  
 })
 
 
