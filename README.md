@@ -63,6 +63,7 @@ checklist eval fin 1er semestre :
     [ V ] Le GET /elements/un-id renvoie un élément en détail
     [ V ] le POST /elements ajoute des données à la base de données
     [ V ] DELETE /elements/un-id qui supprime un enregistrement
+    [ V ] PUT ou PATCH /elements/un-id qui l’enregistrement
     [ V ] Présence d’un mécanisme d’authentification
     [ V ] Possibilité de créer un compte utilisateur de compte
     [ V ] Historique des commits clairs (qui a changé quoi quand)
@@ -73,6 +74,5 @@ checklist eval fin 1er semestre :
     [ V ] 404 en cas de route inconnue et en cas d’enregistrement inconnu
     [ V ] GET en 200
     
-    [ ] PUT ou PATCH /elements/un-id qui l’enregistrement
     [ ] Présence d’un test unitaire pertinent
     [ ] Présence d’un test end-to-end pertinent
