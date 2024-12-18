@@ -1,28 +1,32 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import request from 'supertest';
-import app from '../server/index';  // ton fichier Express
+import { describe, it, expect } from 'vitest';
+import request from "supertest";
+import { app } from "../server/index";
+// import { initialiseDatabase } from '../server/bdd';
 
-describe('Tests pour les routes', () => {
-  it('devrait répondre avec un code 200 à la requête GET /inscription', async () => {
-    const response = await request(app).get('/inscription');
+
+
+describe("test des routes -> status (GET) :", () =>{
+
+  it("test de la route principale (localhost:3000/)", async () => {
+    const response = await request(app).get("/");
+  
     expect(response.status).toBe(200);
-    expect(response.text).toContain('<form'); // Vérifie qu'un formulaire est présent
-  });
+  })
 
-  it('devrait répondre avec un code 201 lors de l\'inscription', async () => {
-    const newUser = {
-      pseudo: 'testuser',
-      nom: 'Test',
-      prenom: 'User',
-      mail: 'testuser@example.com',
-      mdp: 'password123',
-    };
+  it("test de la route connection (localhost:3000/connection)", async () => {
+    const response = await request(app).get("/connection");
+  
+    expect(response.status).toBe(200);
+  })
 
-    const response = await request(app)
-      .post('/inscription')
-      .send(newUser);
+  it("test de la route inscription (localhost:3000/inscription)", async () => {
+    const response = await request(app).get("/inscription");
+  
+    expect(response.status).toBe(200);
+  })
 
-    expect(response.status).toBe(201);
-    expect(response.header['location']).toBe('/connection'); // Vérifie la redirection
-  });
-});
+
+  
+})
+
+

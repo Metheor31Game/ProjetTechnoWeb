@@ -6,7 +6,17 @@ const bcrypt = require("bcrypt");
 const { engine } = require("express-handlebars");
 const { initialiseDatabase, closeDatabase } = require("./bdd");
 
+// import express from "express";
+// import path from "path";
+// import session from "express-session";
+// import bcrypt from "bcrypt";
+// import { engine } from "express-handlebars";
+// import { initialiseDatabase, closeDatabase } from "./bdd";
+
+
+
 const app = express();
+
 const port = 3000;
 
 // - - - - - - - - - MIDDLEWARE  - - - - - - - - - 
@@ -395,3 +405,5 @@ process.on("SIGINT", async () => {
   await closeDatabase();
   process.exit(0);
 });
+
+module.exports = { app };
