@@ -2,6 +2,7 @@
 <link rel="stylesheet" href="/css/dashboard.css">
 <script>
   function deleteSelected() {
+
   // Récupérer toutes les checkbox sélectionnées
   const checkboxes = document.querySelectorAll(".annonce-checkbox:checked");
 
@@ -37,7 +38,7 @@
   <div class="annonces">
     {{#each annonces}}
     <div class="annonce-wrapper">
-      <input type="checkbox" id="checkbox-{{@index}}" class="annonce-checkbox">
+      <input type="checkbox" id="checkbox-{{this.id}}" class="annonce-checkbox">
       <button class="annonce" id="annonce-{{@index}}" onclick="location.href='/annonce/details?id={{this.id}}'">
         <h2>{{this.titre}}</h2>
         <p>Date de mise en ligne : {{this.date}}</p>
