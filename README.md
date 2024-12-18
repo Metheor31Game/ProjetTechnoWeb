@@ -73,6 +73,6 @@ checklist eval fin 1er semestre :
     [ V ] 401 en cas d’accès non authentifié
     [ V ] 404 en cas de route inconnue et en cas d’enregistrement inconnu
     [ V ] GET en 200
+    [ V ] Présence d’un test end-to-end pertinent
     
     [ ] Présence d’un test unitaire pertinent
-    [ ] Présence d’un test end-to-end pertinent
