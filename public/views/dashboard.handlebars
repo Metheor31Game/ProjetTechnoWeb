@@ -29,9 +29,10 @@
   <h1>{{title}}</h1>
 
   <div class="boutons"> 
+    <button class="acceuil" id="acceuil" onclick="location.href='/'"> Acceuil</button>
     <button class="upload" id="upload" onclick="location.href='/upload'"> Ajouter une annonce </button>
-    <button class="deconnection" id="deconnection" onclick="location.href='/logout'"> Se déconnecter </button>
     <button class="delete" id="delete" onclick="deleteSelected()"> Supprimer les annonces sélectionnées </button>
+    <button class="deconnection" id="deconnection" onclick="location.href='/logout'"> Se déconnecter </button>
   </div>
 
   {{#if annonces.length}}

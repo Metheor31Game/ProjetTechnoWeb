@@ -57,7 +57,8 @@ const requireAuth = (req, res, next) => {
 // Route principale
 app.get("/", (req, res) => {
   if (req.session.user) {
-    res.status(200).redirect("/dashboard");
+    res.status(200);
+    // res.status(200).redirect("/dashboard");
   }
   res.status(200).render("home", {
     title: "Bienvenue",
@@ -98,6 +99,9 @@ app.post("/inscription", async (req, res) => {
 
 // Route pour se connecter
 app.get("/connection", (req, res) => {
+  if(req.session.user){
+    res.status(200).redirect("/dashboard");
+  }
   res.status(200).render("connection", {});
 });
 
@@ -226,7 +230,8 @@ app.post("/upload", requireAuth, async (req, res) => {
 
 
   const { titre, adresse, description, lien } = req.body;
-
+  const date = new Date();
+  const dateSansHeure = date.toLocaleDateString();
   if (!titre) {
     return res.status(400).json({ message: "Champ titre requis" });
   }
@@ -238,8 +243,8 @@ app.post("/upload", requireAuth, async (req, res) => {
     const [dashboard] = await connection.query("SELECT id_dashboard FROM dashboard WHERE pseudo_user = (?)",
       [req.session.user])
     const result = await connection.query(
-      "INSERT INTO annonce (id_dashboard, titre, date, adresse, description) VALUES (?, ?, ?, ?, ?)",
-      [dashboard[0].id_dashboard, titre, adresse, description, lien]
+      "INSERT INTO annonce (id_dashboard, titre, date, adresse, description, lien) VALUES (?, ?, ?, ?, ?, ?)",
+      [dashboard[0].id_dashboard, titre, dateSansHeure, adresse, description, lien]
     );
 
     // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
