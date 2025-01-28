@@ -2,12 +2,86 @@
 <link rel="stylesheet" href="/css/annonce-details.css">
 
 <main>
+  <div class="boutons">
+    <button onclick="location.href='/dashboard'">Retour au Dashboard</button>
+  </div>
+  
   <h1>{{title}}</h1>
+
   <div class="annonce-details">
     <h2>{{annonce.titre}}</h2>
+    <img src="../img/404.jpeg" alt="une image random">
     <p><strong>Date de mise en ligne :</strong> {{annonce.date}}</p>
     <p><strong>Adresse :</strong> {{annonce.adresse}}</p>
     <p><strong>Description :</strong> {{annonce.description}}</p>
   </div>
-  <button onclick="location.href='/dashboard'">Retour au Dashboard</button>
+
+  <div class="criteres">
+    <div class="criteres-card">
+      <h3>Budget & modalités</h3>
+      <ul>
+        <li><strong>Loyer/Prix :</strong> {{annonce.loyer}}</li>
+        <li><strong>Charges :</strong> {{annonce.charges}}</li>
+        <li><strong>Frais supplémentaires :</strong> {{annonce.frais}}</li>
+        <li><strong>Type de bail :</strong> {{annonce.type_bail}}</li>
+        <li><strong>Durée de location :</strong> {{annonce.duree_location}}</li>
+        <li><strong>Renouvellement & préavis :</strong> {{annonce.renouvellement}}</li>
+      </ul>
+    </div>
+
+    <div class="criteres-card">
+      <h3>Emplacement</h3>
+      <ul>
+        <li><strong>Quartier :</strong> {{annonce.quartier}}</li>
+        <li><strong>Transport :</strong> {{annonce.transport}}</li>
+        <li><strong>Accéssibilité travail/étude :</strong> {{annonce.accessibilite}}</li>
+      </ul>
+    </div>
+
+    <div class="criteres-card">
+      <h3>Superficie & Design</h3>
+      <ul>
+        <li><strong>Surface habitable :</strong> {{annonce.surface_habitable}}</li>
+        <li><strong>Nombre de pièces :</strong> {{annonce.nombre_pieces}}</li>
+      </ul>
+    </div>
+
+    <div class="criteres-card">
+      <h3>Type de bien</h3>
+      <ul>
+        <li><strong>Meublé (oui/non) :</strong> {{annonce.meuble}}</li>
+        <li><strong>Etage :</strong> {{annonce.etage}}</li>
+        <li><strong>Ascenseur :</strong> {{annonce.ascenseur}}</li>
+        <li><strong>Balcon, terrasse, jardin :</strong> {{annonce.balcon}}</li>
+      </ul>
+    </div>
+
+    <div class="criteres-card">
+      <h3>Energétique et Sonorité</h3>
+      <ul>
+        <li><strong>DPE :</strong> {{annonce.dpe}}</li>
+        <li><strong>Chauffage :</strong> {{annonce.chauffage}}</li>
+        <li><strong>Isolation phonique :</strong> {{annonce.isolation_phonique}}</li>
+        <li><strong>Proximité de sources de bruit :</strong> {{annonce.proximite_bruit}}</li>
+      </ul>
+    </div>
+
+    <div class="criteres-card">
+      <h3>Restrictions</h3>
+      <ul>
+        <li><strong>Colocation :</strong> {{annonce.colocation}}</li>
+        <li><strong>Sous-Location :</strong> {{annonce.sous_location}}</li>
+        <li><strong>Animaux :</strong> {{annonce.animaux}}</li>
+      </ul>
+    </div>
+
+    <div class="criteres-card">
+      <h3>Stationnement & Sécurité</h3>
+      <ul>
+        <li><strong>Parking & Stationnement :</strong> {{annonce.parking}}</li>
+        <li><strong>Code d'entrée, interphone, gardien :</strong> {{annonce.interphone}}</li>
+        <li><strong>Alarme :</strong> {{annonce.alarme}}</li>
+      </ul>
+    </div>
+  </div>
 </main>
