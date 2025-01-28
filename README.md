@@ -76,3 +76,8 @@ checklist eval fin 1er semestre :
     [ V ] Présence d’un test end-to-end pertinent
     
     [ ] Présence d’un test unitaire pertinent
+
+
+
+TODO :
+Séparer en route et controlleur (route pour mettre les routes, et les fonctions sont appelées dans le controlleur).
