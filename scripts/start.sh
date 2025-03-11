@@ -2,7 +2,7 @@
 npm install
 echo "npm install : ok"
 
-cd ./docker/
+cd ../docker/
 mkdir mysql && mkdir www
 chmod 777 mysql/ && chmod 777 www/
 docker compose up -d
