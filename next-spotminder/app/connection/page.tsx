@@ -30,20 +30,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-[70vh] items-center justify-center bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-center text-2xl font-bold tracking-tight">Sign in to your account</CardTitle>
-          <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-center text-2xl font-bold tracking-tight">Se connecter</CardTitle>
+          <CardDescription className="text-center">Entrez vos coordonnées pour accéder à votre compte</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="pseudo">Pseudo</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
+                id="pseudo"
+                type="text"
+                placeholder="exemple"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -52,12 +52,12 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Mot de passe</Label>
                 <Link
-                  href="/forgot-password"
+                  href="/mot-de-passe-oublie"
                   className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                 >
-                  Forgot password?
+                  Mot de passe oublié ?
                 </Link>
               </div>
               <div className="relative">
@@ -75,28 +75,20 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
-              <Label
-                htmlFor="remember"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Remember me
-              </Label>
-            </div>
+            
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full transition-all duration-200 hover:shadow-md" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
             <p className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
-              <Link href="/signup" className="font-medium text-primary hover:text-primary/80 transition-colors">
-                Sign up
+              Pas de compte ?{" "}
+              <Link href="/inscription" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                S'inscrire
               </Link>
             </p>
           </CardFooter>
