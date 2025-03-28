@@ -20,7 +20,9 @@ async function initialiseDatabase() {
     console.log("Connexion réussie !");
 
     // Vous pouvez également exécuter une requête simple pour vérifier si la base fonctionne
+    // Vérification de la base de données en affichant les résultats
     const [rows] = await connection.query("SELECT * FROM utilisateur");
+    console.log("Résultats de la requête utilisateur :", rows);
     return connection;
   } catch (err) {
     console.error("Erreur de connexion : ", err);
@@ -28,7 +30,8 @@ async function initialiseDatabase() {
 }
 
 // Exporter `connection` pour l'utiliser dans `index.js`
-export default { connection, initialiseDatabase, closeDatabase };
+const databaseModule = { connection, initialiseDatabase, closeDatabase };
+export default databaseModule;
 
 async function closeDatabase() {
   if (connection) {
