@@ -1,25 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { createConnection } from "mysql2/promise";
-
-// Fonction pour se connecter à la base de données
-async function connectToDB() {
-  return await createConnection({
-    host: process.env.DB_HOST || "localhost",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "adminspotminder",
-    database: process.env.DB_NAME || "dbSpotMinder",
-    port: parseInt(process.env.DB_PORT || "3306"),
-  });
-}
-
-// Fonction de connexion (POST)
+import { getConnection } from "../../../../server/bdd";
 export async function POST(req: Request) {
   try {
     const { pseudo, mdp } = await req.json();
 
-    // Connexion à la base de données
-    const connection = await connectToDB();
+    // Récupérer la connexion à la base de données
+    const connection = await getConnection();
 
     // Vérification de l'utilisateur
     const [rows]: any = await connection.query(
@@ -43,10 +30,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Fermer la connexion
-    await connection.end();
-
-    // Redirection vers le dashboard
+    // Pas besoin de fermer la connexion ici, car elle est réutilisée
     return NextResponse.redirect(new URL("/dashboard", req.url));
   } catch (err) {
     console.error("Erreur de connexion :", err);
