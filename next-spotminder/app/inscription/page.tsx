@@ -1,49 +1,68 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Eye, EyeOff } from "lucide-react"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 export default function Inscription() {
-  const router = useRouter()
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(""); // Ajout pour afficher les erreurs
   const [formData, setFormData] = useState({
     pseudo: "",
     nom: "",
     prenom: "",
     mail: "",
     mdp: "",
-  })
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(""); // Réinitialiser l'erreur
 
-    // Simuler l'envoi du formulaire
-    console.log("Données d'inscription:", formData)
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    // Simuler un délai de traitement
-    setTimeout(() => {
-      setIsLoading(false)
-      // Rediriger vers la page de connexion après inscription
-      router.push("/connection")
-    }, 1500)
-  }
+      const data = await res.json();
+
+      if (res.ok) {
+        // Succès : redirection vers la page de connexion
+        router.push("/connection");
+      } else {
+        // Afficher l'erreur renvoyée par l'API
+        setError(data.message);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      setError("Erreur réseau, veuillez réessayer");
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-[50vh] flex-col bg-white">
@@ -52,8 +71,12 @@ export default function Inscription() {
           <div className="mx-auto max-w-md">
             <Card className="border-gray-200 bg-white shadow-md">
               <CardHeader className="space-y-1">
-                <CardTitle className="text-center text-2xl font-bold text-black">Inscription</CardTitle>
-                <CardDescription className="text-center text-gray-600">Créez votre compte Spot Minder</CardDescription>
+                <CardTitle className="text-center text-2xl font-bold text-black">
+                  Inscription
+                </CardTitle>
+                <CardDescription className="text-center text-gray-600">
+                  Créez votre compte Spot Minder
+                </CardDescription>
               </CardHeader>
 
               <form onSubmit={handleSubmit}>
@@ -146,10 +169,17 @@ export default function Inscription() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Afficher les erreurs s'il y en a */}
+                  {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 </CardContent>
 
                 <CardFooter className="flex flex-col space-y-4">
-                  <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    disabled={isLoading}
+                  >
                     {isLoading ? "Inscription en cours..." : "S'inscrire"}
                   </Button>
 
@@ -166,6 +196,5 @@ export default function Inscription() {
         </div>
       </main>
     </div>
-  )
+  );
 }
-
