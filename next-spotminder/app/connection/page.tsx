@@ -1,107 +1,145 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react"; // Importer signIn
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
-export default function LoginPage() {
+export default function Connection() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [pseudo, setPseudo] = useState("");
-  const [mdp, setMdp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    pseudo: "",
+    mdp: "",
+  });
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pseudo, mdp }),
+      const result = await signIn("credentials", {
+        redirect: false, // Ne pas rediriger automatiquement
+        pseudo: formData.pseudo,
+        mdp: formData.mdp,
       });
 
-      if (res.ok) {
-        router.push("/dashboard"); // Redirection si succès
+      if (result?.error) {
+        setError(result.error);
+        setIsLoading(false);
       } else {
-        const data = await res.json();
-        setError(data.message);
+        router.push("/dashboard"); // Redirige manuellement
       }
     } catch (err) {
-      setError("Erreur serveur");
+      setError("Erreur réseau, veuillez réessayer");
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
-      <Card className="w-full max-w-md shadow-md">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">
-            Se connecter
-          </CardTitle>
-        </CardHeader>
-        <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="pseudo">Pseudo</Label>
-              <Input
-                id="pseudo"
-                type="text"
-                placeholder="exemple"
-                value={pseudo}
-                onChange={(e) => setPseudo(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={mdp}
-                  onChange={(e) => setMdp(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                </button>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            {error && (
-              <p className="text-center text-sm text-red-500">{error}</p>
-            )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Connexion en cours..." : "Se connecter"}
-            </Button>
-            <p className="text-center text-sm">
-              Pas de compte ? <Link href="/inscription">S'inscrire</Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="flex min-h-[50vh] flex-col bg-white">
+      <main className="flex-1 py-12">
+        <div className="container mx-auto px-auto">
+          <div className="mx-auto max-w-md">
+            <Card className="border-gray-200 bg-white shadow-md">
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-center text-2xl font-bold text-black">
+                  Connexion
+                </CardTitle>
+                <CardDescription className="text-center text-gray-600">
+                  Connectez-vous à votre compte Spot Minder
+                </CardDescription>
+              </CardHeader>
+
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pseudo" className="text-black">
+                      Pseudo
+                    </Label>
+                    <Input
+                      id="pseudo"
+                      name="pseudo"
+                      value={formData.pseudo}
+                      onChange={handleChange}
+                      placeholder="Entrez votre pseudo"
+                      required
+                      className="border-gray-300 focus:border-black focus:ring-black"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="mdp" className="text-black">
+                      Mot de passe
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="mdp"
+                        name="mdp"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.mdp}
+                        onChange={handleChange}
+                        placeholder="Entrez votre mot de passe"
+                        required
+                        className="border-gray-300 focus:border-black focus:ring-black pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                      >
+                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                </CardContent>
+
+                <CardFooter className="flex flex-col space-y-4">
+                  <Button
+                    type="submit"
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Connexion en cours..." : "Se connecter"}
+                  </Button>
+
+                  <div className="text-center text-sm">
+                    <span className="text-gray-600">Pas de compte ? </span>
+                    <Link href="/inscription" className="font-medium text-black hover:underline">
+                      S'inscrire
+                    </Link>
+                  </div>
+                </CardFooter>
+              </form>
+            </Card>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
