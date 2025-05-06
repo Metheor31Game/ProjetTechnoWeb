@@ -1,15 +1,16 @@
-import { createConnection } from "mysql2/promise";
-import { config } from "dotenv";
+const mysql = require("mysql2/promise");
+const dotenv = require("dotenv");
+
 
 // Charger les variables d'environnement
-config();
+dotenv.config();
 
 let connection = null;
 
 async function initialiseDatabase() {
   try {
     // Utilisation des variables d'environnement pour la connexion
-    connection = await createConnection({
+    connection = await mysql.createConnection({
       host: process.env.DB_HOST || "localhost", // En cas d'absence dans .env, on utilise 'localhost' par défaut
       user: process.env.DB_USER || "root", // Utilisation de 'root' par défaut si DB_USER n'est pas défini
       password: process.env.DB_PASSWORD || "adminspotminder", // Mot de passe par défaut
@@ -28,7 +29,7 @@ async function initialiseDatabase() {
 }
 
 // Exporter `connection` pour l'utiliser dans `index.js`
-export default { connection, initialiseDatabase, closeDatabase };
+module.exports = { connection, initialiseDatabase, closeDatabase };
 
 async function closeDatabase() {
   if (connection) {

@@ -1,33 +1,24 @@
-// - - - - - - - - - LES IMPORTS - - - - - - - - -
 const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const { engine } = require("express-handlebars");
-const { initialiseDatabase, closeDatabase } = require("./bdd").default;
 
-// import express from "express";
-// import path from "path";
-// import session from "express-session";
-// import bcrypt from "bcrypt";
-// import { engine } from "express-handlebars";
-// import { initialiseDatabase, closeDatabase } from "./bdd";
+// Importer directement les fonctions sans `.default`
+const { initialiseDatabase, closeDatabase } = require("./bdd");
 
 const app = express();
-
 const port = 3000;
 
 // - - - - - - - - - MIDDLEWARE  - - - - - - - - -
 
-// Configuration du moteur de template Handlebars
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "../public/views"));
-app.use(express.urlencoded({ extended: true })); // Pour les formulaires classiques
-app.use(express.json()); // Pour les données JSON
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static("public"));
 
-// Gestion des sessions
 app.use(
   session({
     secret: "votre_secret",
@@ -37,9 +28,9 @@ app.use(
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60, // 1 heure
+      maxAge: 1000 * 60 * 60,
     },
-  }),
+  })
 );
 
 // - - - - - - - - - LES ROUTES  - - - - - - - - -
@@ -287,7 +278,6 @@ app.post("/upload", requireAuth, async (req, res) => {
 app.get("/annonces/:id?", async (req, res) => {
   try {
     const connection = await initialiseDatabase();
-    //annonceId peut etre nul, donc cela défini si on veut une liste ou un seul élément
     const annonceId = req.params.id;
 
     if (annonceId) {
@@ -296,136 +286,20 @@ app.get("/annonces/:id?", async (req, res) => {
         [annonceId],
       );
       if (rows.length === 0) {
-        return res.status(404).json({ message: "Annonce non trouvée." });
+        return res.status(404).json({ message: "Annonce introuvable." });
       }
-      res.status(200).json(rows[0]);
-    } else {
-      const [rows] = await connection.query("SELECT * FROM annonce");
-      res.status(200).json(rows);
+      return res.json(rows[0]);
     }
+
+    const [rows] = await connection.query("SELECT * FROM annonce");
+    res.json(rows);
   } catch (err) {
-    console.error("Erreur lors de la récupération des annonces :", err);
+    console.error("Erreur lors de la récupération des annonces:", err);
     res.status(500).json({ message: "Erreur interne du serveur." });
   }
 });
 
-app.post("/annonces", async (req, res) => {
-  try {
-    const connection = await initialiseDatabase();
-
-    // Récupérer les informations du JSON dans le corps de la requête
-    const { id_dashboard, titre, date, adresse, description, lien } = req.body;
-
-    // Validation des données reçues
-    if (!id_dashboard || !titre || !date || !adresse || !lien) {
-      return res.status(400).json({ message: "Tous les champs sont requis." });
-    }
-
-    // Insertion de l'annonce dans la base de données
-    const [result] = await connection.query(
-      "INSERT INTO annonce (id_dashboard, titre, date, adresse, description, lien) VALUES (?, ?, ?, ?, ?, ?)",
-      [id_dashboard, titre, date, adresse, description, lien],
-    );
-
-    // Réponse réussie avec le nouvel ID de l'annonce
-    res.status(201).json({
-      message: "Annonce créée avec succès.",
-      annonceId: result.insertId,
-    });
-  } catch (err) {
-    console.error("Erreur lors de l'ajout de l'annonce :", err);
-    res.status(500).json({ message: "Erreur interne du serveur." });
-  }
-});
-
-app.put("/annonces/:id", async (req, res) => {
-  try {
-    const connection = await initialiseDatabase();
-
-    // Récupérer l'ID de l'annonce dans les paramètres de l'URL
-    const annonceId = req.params.id;
-
-    // Vérifier si l'ID de l'annonce est fourni
-    if (!annonceId) {
-      return res.status(400).json({ message: "ID de l'annonce requis." });
-    }
-
-    // Récupérer les informations du JSON dans le corps de la requête
-    const { id_dashboard, titre, date, adresse, description, lien } = req.body;
-
-    // Validation des données reçues
-    if (!id_dashboard || !titre || !date || !adresse || !description || !lien) {
-      return res.status(400).json({ message: "Tous les champs sont requis." });
-    }
-
-    // Vérifier si l'annonce existe
-    const [existingAnnonce] = await connection.query(
-      "SELECT * FROM annonce WHERE id = ?",
-      [annonceId],
-    );
-    if (existingAnnonce.length === 0) {
-      return res.status(404).json({ message: "Annonce non trouvée." });
-    }
-
-    // Mettre à jour l'annonce dans la base de données
-    await connection.query(
-      "UPDATE annonce SET id_dashboard = ?, titre = ?, date = ?, adresse = ?, description = ?, lien = ? WHERE id = ?",
-      [id_dashboard, titre, date, adresse, description, lien, annonceId],
-    );
-
-    // Réponse réussie
-    res.status(200).json({
-      message: "Annonce mise à jour avec succès.",
-      annonceId: annonceId,
-    });
-  } catch (err) {
-    console.error("Erreur lors de la mise à jour de l'annonce :", err);
-    res.status(500).json({ message: "Erreur interne du serveur." });
-  }
-});
-
-app.delete("/annonces/:id", async (req, res) => {
-  try {
-    const connection = await initialiseDatabase();
-
-    // Récupérer l'ID de l'annonce dans les paramètres de l'URL
-    const annonceId = req.params.id;
-
-    // Vérifier si l'ID de l'annonce est fourni
-    if (!annonceId) {
-      return res.status(400).json({ message: "ID de l'annonce requis." });
-    }
-
-    // Vérifier si l'annonce existe dans la base de données
-    const [existingAnnonce] = await connection.query(
-      "SELECT * FROM annonce WHERE id = ?",
-      [annonceId],
-    );
-    if (existingAnnonce.length === 0) {
-      return res.status(404).json({ message: "Annonce non trouvée." });
-    }
-
-    // Supprimer l'annonce de la base de données
-    await connection.query("DELETE FROM annonce WHERE id = ?", [annonceId]);
-
-    // Réponse réussie
-    res.status(200).json({
-      message: "Annonce supprimée avec succès.",
-      annonceId: annonceId,
-    });
-  } catch (err) {
-    console.error("Erreur lors de la suppression de l'annonce :", err);
-    res.status(500).json({ message: "Erreur interne du serveur." });
-  }
-});
-
-// Route inconnue
-app.use((req, res) => {
-  res.status(404).json({ message: "Route introuvable." });
-});
-
-// - - - - - - - - - INITIALISATION DE LA DATABASE - - - - - - - - -
-
+// Lancer le serveur
 initialiseDatabase()
   .then(() => {
     app.listen(port, () => {
@@ -436,6 +310,7 @@ initialiseDatabase()
     console.error("Erreur lors de l'initialisation de la DATABASE :", err);
   });
 
+// Traiter la fermeture du serveur
 process.on("SIGINT", async () => {
   console.log("Arrêt du serveur...");
   await closeDatabase();
