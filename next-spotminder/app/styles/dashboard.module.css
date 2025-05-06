@@ -1,0 +1,46 @@
+/* styles/dashboard.module.css */
+.boutons {
+    margin: 1rem 0;
+  }
+  
+  .acceuil,
+  .upload,
+  .delete,
+  .deconnection {
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  
+  .annonces {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .annonceWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .annonceCheckbox {
+    margin-right: 0.5rem;
+  }
+  
+  .annonce {
+    width: 100%;
+    text-align: left;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .annonce h2 {
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .annonce p {
+    margin: 0.25rem 0;
+  }
