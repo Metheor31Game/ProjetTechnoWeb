@@ -2,65 +2,105 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import styles from "../styles/dashboard.module.css";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Annonce {
   id: string;
   titre: string;
   date: string;
   adresse: string;
+  description?: string;
+  lien?: string | null;
+}
+
+interface User {
+  prenom: string;
+  nom: string;
 }
 
 const Dashboard: React.FC<{ title: string }> = ({ title }) => {
   const router = useRouter();
-  const { data: session, status } = useSession(); // Récupérer la session
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Rediriger si non authentifié
+  // Vérifier l'authentification, récupérer les annonces et les infos utilisateur
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/connection");
-    }
-  }, [status, router]);
-
-  // Récupérer les annonces
-  useEffect(() => {
-    if (status !== "authenticated" || !session?.user?.pseudo) return;
-
-    const fetchAnnonces = async () => {
+    const checkAuthAndFetchData = async () => {
       try {
-        const res = await fetch(`/api/annonces?pseudo=${session.user.pseudo}`);
-        if (!res.ok) throw new Error("Erreur lors de la récupération des annonces");
-        const data = await res.json();
-        setAnnonces(data);
+        // Vérifier l'authentification et récupérer les annonces
+        const annoncesResponse = await fetch("http://localhost:3000/dashboard", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (annoncesResponse.status === 401) {
+          setIsAuthenticated(false);
+          router.push("/connection");
+          return;
+        } else if (!annoncesResponse.ok) {
+          throw new Error("Erreur lors de la récupération des annonces");
+        }
+
+        setIsAuthenticated(true);
+        const annoncesData = await annoncesResponse.json();
+        setAnnonces(annoncesData);
+
+        // Récupérer les infos utilisateur
+        const userResponse = await fetch("http://localhost:3000/user", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!userResponse.ok) {
+          throw new Error("Erreur lors de la récupération des infos utilisateur");
+        }
+        const userData = await userResponse.json();
+        setUser({ prenom: userData.prenom, nom: userData.nom });
+
+        setLoading(false);
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoading(false);
+        setIsAuthenticated(false);
+        router.push("/connection");
       }
     };
-    fetchAnnonces();
-  }, [session, status]);
+    checkAuthAndFetchData();
+  }, [router]);
+
+  // Gérer la sélection des cases à cocher
+  const handleCheckboxChange = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+    );
+  };
 
   const deleteSelected = async () => {
-    const checkboxes = document.querySelectorAll<HTMLInputElement>(".annonce-checkbox:checked");
-    const selectedIds = Array.from(checkboxes).map((checkbox) => checkbox.id.split("-")[1]);
-
     if (selectedIds.length === 0) {
       alert("Veuillez sélectionner au moins une annonce à supprimer.");
       return;
     }
 
     const separator = ",";
-    const url = `/api/delete?ids=${selectedIds.join(separator)}`;
+    const url = `http://localhost:3000/delete?ids=${selectedIds.join(separator)}`;
     try {
-      const res = await fetch(url, { method: "GET" });
+      const res = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await res.json();
       if (res.ok) {
-        router.push("/dashboard");
+        setAnnonces(annonces.filter((annonce) => !selectedIds.includes(annonce.id)));
+        setSelectedIds([]); // Réinitialiser la sélection
       } else {
-        throw new Error("Erreur lors de la suppression");
+        alert(data.message || "Erreur lors de la suppression des annonces");
       }
     } catch (err) {
       console.error(err);
@@ -68,53 +108,107 @@ const Dashboard: React.FC<{ title: string }> = ({ title }) => {
     }
   };
 
-  if (status === "loading" || loading) return <p>Chargement...</p>;
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:3000/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+      router.push("/connection");
+    } catch (err) {
+      console.error(err);
+      router.push("/connection");
+    }
+  };
+
+  if (isAuthenticated === null || loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center bg-white">
+        <Card className="mx-auto max-w-md border-gray-200 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl font-bold text-black">
+              Chargement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-gray-600">Chargement des annonces...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <main>
-      <h1>{title}</h1>
-      <div className={styles.boutons}>
-        <button className={styles.acceuil} onClick={() => router.push("/")}>
-          Accueil
-        </button>
-        <button className={styles.upload} onClick={() => router.push("/upload")}>
-          Ajouter une annonce
-        </button>
-        <button className={styles.delete} onClick={deleteSelected}>
-          Supprimer les annonces sélectionnées
-        </button>
-        <button
-          className={styles.deconnection}
-          onClick={() => signOut({ callbackUrl: "/connection" })}
-        >
-          Se déconnecter
-        </button>
+    <div className="flex min-h-[50vh] flex-col bg-white py-12 relative">
+      <div className="absolute top-4 right-4">
+        {user && (
+          <p className="text-black font-semibold text-sm">
+            {user.prenom} {user.nom}
+          </p>
+        )}
       </div>
-
-      {annonces.length > 0 ? (
-        <div className={styles.annonces}>
-          {annonces.map((annonce) => (
-            <div key={annonce.id} className={styles.annonceWrapper}>
-              <input
-                type="checkbox"
-                id={`checkbox-${annonce.id}`}
-                className={styles.annonceCheckbox}
-              />
-              <button
-                className={styles.annonce}
-                onClick={() => router.push(`/annonce/details?id=${annonce.id}`)}
-              >
-                <h2>{annonce.titre}</h2>
-                <p>Date de mise en ligne : {annonce.date}</p>
-                <p>Adresse : {annonce.adresse}</p>
-              </button>
-            </div>
-          ))}
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold text-black mb-6 text-center">{title}</h1>
+        <div className="flex flex-wrap gap-4 justify-center mb-6">
+          <Button
+            className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
+            onClick={() => router.push("/")}
+          >
+            Accueil
+          </Button>
+          <Button
+            className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
+            onClick={() => router.push("/upload")}
+          >
+            Ajouter une annonce
+          </Button>
+          <Button
+            className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
+            onClick={deleteSelected}
+          >
+            Supprimer les annonces sélectionnées
+          </Button>
+          <Button
+            className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
+            onClick={handleLogout}
+          >
+            Se déconnecter
+          </Button>
         </div>
-      ) : (
-        <p>Aucune annonce disponible pour le moment.</p>
-      )}
-    </main>
+
+        {annonces.length > 0 ? (
+          <div className="grid gap-4">
+            {annonces.map((annonce) => (
+              <Card key={annonce.id} className="border-gray-200 shadow-md">
+                <CardContent className="flex items-center p-4">
+                  <Input
+                    type="checkbox"
+                    id={`checkbox-${annonce.id}`}
+                    checked={selectedIds.includes(annonce.id)}
+                    onChange={() => handleCheckboxChange(annonce.id)}
+                    className="mr-4 h-5 w-5 border-gray-300"
+                  />
+                  <div
+                    className="flex-1 cursor-pointer"
+                    onClick={() => router.push(`/annonce/details?id=${annonce.id}`)}
+                  >
+                    <h2 className="text-lg font-semibold text-black">{annonce.titre}</h2>
+                    <p className="text-sm text-gray-600">Date de mise en ligne : {annonce.date}</p>
+                    <p className="text-sm text-gray-600">Adresse : {annonce.adresse}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="mx-auto max-w-md border-gray-200 shadow-md">
+            <CardContent className="p-4">
+              <p className="text-center text-gray-600">Aucune annonce disponible pour le moment.</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
   );
 };
 

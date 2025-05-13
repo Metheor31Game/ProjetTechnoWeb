@@ -3,14 +3,20 @@ const path = require("path");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const { engine } = require("express-handlebars");
+const cors = require("cors");
 
-// Importer directement les fonctions sans `.default`
 const { initialiseDatabase, closeDatabase } = require("./bdd");
 
 const app = express();
 const port = 3000;
 
 // - - - - - - - - - MIDDLEWARE  - - - - - - - - -
+app.use(
+  cors({
+    origin: "http://localhost:3001",
+    credentials: true,
+  })
+);
 
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
@@ -49,7 +55,6 @@ const requireAuth = (req, res, next) => {
 app.get("/", (req, res) => {
   if (req.session.user) {
     res.status(200);
-    // res.status(200).redirect("/dashboard");
   }
   res.status(200).render("home", {
     title: "Bienvenue",
@@ -83,7 +88,7 @@ app.post("/inscription", async (req, res) => {
       pseudo,
     ]);
 
-    res.status(201).redirect("/connection");
+    res.status(201).json({ message: "Inscription réussie" }); // Changé en JSON
   } catch (err) {
     console.error("Erreur lors de l'inscription :", err);
     res.status(500).json({ message: "Erreur lors de l'inscription." });
@@ -93,9 +98,10 @@ app.post("/inscription", async (req, res) => {
 // Route pour se connecter
 app.get("/connection", (req, res) => {
   if (req.session.user) {
-    res.status(200).redirect("/dashboard");
+    res.status(200).json({ message: "Déjà connecté" }); // Changé en JSON
+  } else {
+    res.status(200).render("connection", {});
   }
-  res.status(200).render("connection", {});
 });
 
 // Route pour gérer la connexion (POST)
@@ -113,16 +119,12 @@ app.post("/connection", async (req, res) => {
       const match = await bcrypt.compare(mdp, rows[0].mdp);
       if (match) {
         req.session.user = pseudo;
-        return res.status(200).redirect("/dashboard");
+        return res.status(200).json({ message: "Connexion réussie" }); // Changé en JSON
       } else {
-        return res
-          .status(401)
-          .render("connection", { message: "Mot de passe incorrect." });
+        return res.status(401).json({ message: "Mot de passe incorrect." }); // Changé en JSON
       }
     } else {
-      return res
-        .status(404)
-        .render("connection", { message: "Utilisateur non trouvé." });
+      return res.status(404).json({ message: "Utilisateur non trouvé." }); // Changé en JSON
     }
   } catch (err) {
     console.error("Erreur lors de la connexion :", err);
@@ -138,7 +140,7 @@ app.get("/logout", (req, res) => {
         .status(500)
         .json({ message: "Erreur lors de la déconnexion." });
     }
-    res.redirect("/connection");
+    res.status(200).json({ message: "Déconnexion réussie" }); // Changé en JSON
   });
 });
 
@@ -162,10 +164,7 @@ app.get("/dashboard", requireAuth, async (req, res) => {
       [dashboard[0].id_dashboard],
     );
 
-    res.status(200).render("dashboard", {
-      title: "Dashboard",
-      annonces,
-    });
+    res.status(200).json(annonces); // Changé en JSON
   } catch (err) {
     console.error("Erreur lors de la récupération des annonces :", err);
     res.status(500).json({ message: "Erreur interne du serveur." });
@@ -191,7 +190,7 @@ app.get("/delete", requireAuth, async (req, res) => {
 
     await connection.query(query, idArray);
 
-    res.status(200).redirect("/dashboard");
+    res.status(200).json({ message: "Suppression réussie" }); // Changé en JSON
   } catch (err) {
     console.error("Erreur lors de la suppression des annonces :", err);
     res
@@ -219,10 +218,7 @@ app.get("/annonce/details", requireAuth, async (req, res) => {
       return res.status(404).json({ message: "Annonce introuvable." });
     }
 
-    res.status(200).render("annonces", {
-      title: "Détails de l'annonce",
-      annonce: rows[0],
-    });
+    res.status(200).json(rows[0]); // Changé en JSON
   } catch (err) {
     console.error(
       "Erreur lors de la récupération des détails de l'annonce :",
@@ -247,7 +243,6 @@ app.post("/upload", requireAuth, async (req, res) => {
   try {
     const connection = await initialiseDatabase();
 
-    // Insérer l'annonce dans la base de donnée
     const [dashboard] = await connection.query(
       "SELECT id_dashboard FROM dashboard WHERE pseudo_user = (?)",
       [req.session.user],
@@ -264,18 +259,15 @@ app.post("/upload", requireAuth, async (req, res) => {
       ],
     );
 
-    // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
-    res.redirect("/dashboard");
+    res.status(201).json({ message: "Annonce ajoutée" }); // Changé en JSON
   } catch (err) {
     console.error("Erreur lors de l'ajout de l'annonce  : ", err);
     res.status(500).json({ message: "Erreur lors de l'ajout d'une annonce" });
   }
 });
 
-// - - - - - - - - - - - routes qui renvoient du JSON - - - - - - - - - - - - - -
-
 // Route pour récupérer les annonces
-app.get("/annonces/:id?", async (req, res) => {
+app.get("/annonces/:id?", requireAuth, async (req, res) => {
   try {
     const connection = await initialiseDatabase();
     const annonceId = req.params.id;

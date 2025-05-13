@@ -15,14 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
 
 export default function Inscription() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(""); // Ajout pour afficher les erreurs
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     pseudo: "",
     nom: "",
@@ -39,23 +37,29 @@ export default function Inscription() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(""); // Réinitialiser l'erreur
+    setError("");
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const response = await fetch("http://localhost:3000/inscription", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          pseudo: formData.pseudo,
+          nom: formData.nom,
+          prenom: formData.prenom,
+          mail: formData.mail,
+          mdp: formData.mdp,
+        }).toString(),
+        credentials: "include",
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // Succès : redirection vers la page de connexion
+      const data = await response.json();
+      if (response.ok) {
         router.push("/connection");
       } else {
-        // Afficher l'erreur renvoyée par l'API
-        setError(data.message);
+        setError(data.message || "Erreur lors de l'inscription");
         setIsLoading(false);
       }
     } catch (err) {
@@ -170,7 +174,6 @@ export default function Inscription() {
                     </div>
                   </div>
 
-                  {/* Afficher les erreurs s'il y en a */}
                   {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 </CardContent>
 

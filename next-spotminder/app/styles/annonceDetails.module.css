@@ -1,0 +1,45 @@
+.boutons {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+  }
+  
+  .retourDashboard {
+    background-color: #000;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .retourDashboard:hover {
+    background-color: #1f2937;
+  }
+  
+  .detailItem {
+    margin-bottom: 1rem;
+  }
+  
+  .detailLabel {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.875rem;
+  }
+  
+  .detailValue {
+    color: #374151;
+    font-size: 1rem;
+  }
+  
+  .lien {
+    color: #2563eb;
+    text-decoration: underline;
+    font-size: 0.875rem;
+  }
+  
+  .lien:hover {
+    color: #1e40af;
+  }

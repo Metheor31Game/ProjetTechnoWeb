@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react"; // Importer signIn
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,8 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
 
 export default function Connection() {
   const router = useRouter();
@@ -40,17 +37,24 @@ export default function Connection() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        redirect: false, // Ne pas rediriger automatiquement
-        pseudo: formData.pseudo,
-        mdp: formData.mdp,
+      const response = await fetch("http://localhost:3000/connection", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          pseudo: formData.pseudo,
+          mdp: formData.mdp,
+        }).toString(),
+        credentials: "include",
       });
 
-      if (result?.error) {
-        setError(result.error);
-        setIsLoading(false);
+      const data = await response.json();
+      if (response.ok) {
+        router.push("/dashboard");
       } else {
-        router.push("/dashboard"); // Redirige manuellement
+        setError(data.message || "Erreur lors de la connexion");
+        setIsLoading(false);
       }
     } catch (err) {
       setError("Erreur réseau, veuillez réessayer");
