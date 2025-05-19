@@ -3,12 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +34,9 @@ export default function AjouterAnnonce() {
         } else if (response.ok) {
           setIsAuthenticated(true);
         } else {
-          throw new Error("Erreur lors de la vérification de l'authentification");
+          throw new Error(
+            "Erreur lors de la vérification de l'authentification",
+          );
         }
       } catch (err) {
         console.error(err);
@@ -82,6 +79,7 @@ export default function AjouterAnnonce() {
         setError(data.message || "Erreur lors de l'ajout de l'annonce");
         setIsLoading(false);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Erreur réseau, veuillez réessayer");
       setIsLoading(false);
@@ -90,15 +88,17 @@ export default function AjouterAnnonce() {
 
   if (isAuthenticated === null) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center bg-white">
-        <Card className="mx-auto max-w-md border-gray-200 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-center text-2xl font-bold text-black">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-blue-100 px-4">
+        <Card className="mx-auto max-w-md border-2 border-gray-300 bg-white shadow-xl">
+          <CardHeader className="border-b border-gray-200 py-6">
+            <CardTitle className="text-center text-2xl font-bold text-gray-900">
               Chargement
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-600">Vérification de l'authentification...</p>
+          <CardContent className="p-6">
+            <p className="text-center text-gray-600">
+              Vérification de l authentification...
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -106,25 +106,28 @@ export default function AjouterAnnonce() {
   }
 
   return (
-    <div className="flex min-h-[50vh] flex-col bg-white py-12">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-50 to-blue-100 py-12">
       <div className="container mx-auto px-4">
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-6">
           <Link href="/dashboard">
-            <Button className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
+            <Button className="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors">
               Retour au dashboard
             </Button>
           </Link>
         </div>
-        <Card className="mx-auto max-w-md border-gray-200 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-black">
+        <Card className="mx-auto max-w-md border-2 border-gray-300 bg-white shadow-xl">
+          <CardHeader className="border-b border-gray-200 py-6">
+            <CardTitle className="text-2xl font-bold text-gray-900">
               Ajouter une annonce
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="titre" className="text-sm font-semibold text-gray-700">
+                <Label
+                  htmlFor="titre"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Titre *
                 </Label>
                 <Input
@@ -135,11 +138,14 @@ export default function AjouterAnnonce() {
                   onChange={handleChange}
                   placeholder="Titre de l'annonce"
                   required
-                  className="mt-1 border-gray-300 focus:border-black focus:ring-black"
+                  className="mt-1 border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
                 />
               </div>
               <div>
-                <Label htmlFor="adresse" className="text-sm font-semibold text-gray-700">
+                <Label
+                  htmlFor="adresse"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Adresse *
                 </Label>
                 <Input
@@ -150,11 +156,14 @@ export default function AjouterAnnonce() {
                   onChange={handleChange}
                   placeholder="Adresse du bien"
                   required
-                  className="mt-1 border-gray-300 focus:border-black focus:ring-black"
+                  className="mt-1 border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
                 />
               </div>
               <div>
-                <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                <Label
+                  htmlFor="description"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Description
                 </Label>
                 <Input
@@ -164,11 +173,14 @@ export default function AjouterAnnonce() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Description de l'annonce ..."
-                  className="mt-1 border-gray-300 focus:border-black focus:ring-black"
+                  className="mt-1 border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
                 />
               </div>
               <div>
-                <Label htmlFor="lien" className="text-sm font-semibold text-gray-700">
+                <Label
+                  htmlFor="lien"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Lien
                 </Label>
                 <Input
@@ -178,16 +190,16 @@ export default function AjouterAnnonce() {
                   value={formData.lien}
                   onChange={handleChange}
                   placeholder="www.le_lien_de_lannonce.com"
-                  className="mt-1 border-gray-300 focus:border-black focus:ring-black"
+                  className="mt-1 border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
                 />
               </div>
               {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
+                <p className="text-red-600 text-sm text-center">{error}</p>
               )}
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+                className="w-full bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors disabled:bg-blue-500"
               >
                 {isLoading ? "Ajout en cours..." : "Ajouter une annonce"}
               </Button>

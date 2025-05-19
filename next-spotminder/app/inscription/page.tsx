@@ -62,6 +62,7 @@ export default function Inscription() {
         setError(data.message || "Erreur lors de l'inscription");
         setIsLoading(false);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Erreur réseau, veuillez réessayer");
       setIsLoading(false);
@@ -69,135 +70,153 @@ export default function Inscription() {
   };
 
   return (
-    <div className="flex min-h-[50vh] flex-col bg-white">
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-auto">
-          <div className="mx-auto max-w-md">
-            <Card className="border-gray-200 bg-white shadow-md">
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-center text-2xl font-bold text-black">
-                  Inscription
-                </CardTitle>
-                <CardDescription className="text-center text-gray-600">
-                  Créez votre compte Spot Minder
-                </CardDescription>
-              </CardHeader>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-blue-100 px-4">
+      <Card className="w-full max-w-md border-2 border-gray-300 bg-white shadow-xl">
+        <CardHeader className="space-y-2 text-center border-b border-gray-200 py-6">
+          <CardTitle className="text-3xl font-bold text-gray-900">
+            Inscription
+          </CardTitle>
+          <CardDescription className="text-gray-500">
+            Créez votre compte Spot Minder
+          </CardDescription>
+        </CardHeader>
 
-              <form onSubmit={handleSubmit}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="pseudo" className="text-black">
-                      Pseudo
-                    </Label>
-                    <Input
-                      id="pseudo"
-                      name="pseudo"
-                      value={formData.pseudo}
-                      onChange={handleChange}
-                      placeholder="Entrez votre pseudo"
-                      required
-                      className="border-gray-300 focus:border-black focus:ring-black"
-                    />
-                  </div>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="p-6 space-y-6">
+            <div className="space-y-2">
+              <Label
+                htmlFor="pseudo"
+                className="text-sm font-medium text-gray-700"
+              >
+                Pseudo
+              </Label>
+              <Input
+                id="pseudo"
+                name="pseudo"
+                value={formData.pseudo}
+                onChange={handleChange}
+                placeholder="Entrez votre pseudo"
+                required
+                className="border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
+              />
+            </div>
 
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="nom" className="text-black">
-                        Nom
-                      </Label>
-                      <Input
-                        id="nom"
-                        name="nom"
-                        value={formData.nom}
-                        onChange={handleChange}
-                        placeholder="Entrez votre nom"
-                        required
-                        className="border-gray-300 focus:border-black focus:ring-black"
-                      />
-                    </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="nom"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Nom
+                </Label>
+                <Input
+                  id="nom"
+                  name="nom"
+                  value={formData.nom}
+                  onChange={handleChange}
+                  placeholder="Entrez votre nom"
+                  required
+                  className="border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
+                />
+              </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="prenom" className="text-black">
-                        Prénom
-                      </Label>
-                      <Input
-                        id="prenom"
-                        name="prenom"
-                        value={formData.prenom}
-                        onChange={handleChange}
-                        placeholder="Entrez votre prénom"
-                        required
-                        className="border-gray-300 focus:border-black focus:ring-black"
-                      />
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="prenom"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Prénom
+                </Label>
+                <Input
+                  id="prenom"
+                  name="prenom"
+                  value={formData.prenom}
+                  onChange={handleChange}
+                  placeholder="Entrez votre prénom"
+                  required
+                  className="border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
+                />
+              </div>
+            </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="mail" className="text-black">
-                      Email
-                    </Label>
-                    <Input
-                      id="mail"
-                      name="mail"
-                      type="email"
-                      value={formData.mail}
-                      onChange={handleChange}
-                      placeholder="Entrez votre email"
-                      required
-                      className="border-gray-300 focus:border-black focus:ring-black"
-                    />
-                  </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="mail"
+                className="text-sm font-medium text-gray-700"
+              >
+                Email
+              </Label>
+              <Input
+                id="mail"
+                name="mail"
+                type="email"
+                value={formData.mail}
+                onChange={handleChange}
+                placeholder="Entrez votre email"
+                required
+                className="border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600"
+              />
+            </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="mdp" className="text-black">
-                      Mot de passe
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="mdp"
-                        name="mdp"
-                        type={showPassword ? "text" : "password"}
-                        value={formData.mdp}
-                        onChange={handleChange}
-                        placeholder="Entrez votre mot de passe"
-                        required
-                        className="border-gray-300 focus:border-black focus:ring-black pr-10"
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                      >
-                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                      </button>
-                    </div>
-                  </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="mdp"
+                className="text-sm font-medium text-gray-700"
+              >
+                Mot de passe
+              </Label>
+              <div className="relative">
+                <Input
+                  id="mdp"
+                  name="mdp"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.mdp}
+                  onChange={handleChange}
+                  placeholder="Entrez votre mot de passe"
+                  required
+                  className="border-2 border-gray-300 focus:border-blue-600 focus:ring-blue-600 pr-10"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-blue-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={
+                    showPassword
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+            </div>
 
-                  {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                </CardContent>
+            {error && (
+              <p className="text-center text-sm text-red-600">{error}</p>
+            )}
+          </CardContent>
 
-                <CardFooter className="flex flex-col space-y-4">
-                  <Button
-                    type="submit"
-                    className="w-full bg-black text-white hover:bg-gray-800"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Inscription en cours..." : "S'inscrire"}
-                  </Button>
+          <CardFooter className="flex flex-col space-y-4 pt-6">
+            <Button
+              type="submit"
+              className="w-full rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors disabled:bg-blue-500"
+              disabled={isLoading}
+            >
+              {isLoading ? "Inscription en cours..." : "S'inscrire"}
+            </Button>
 
-                  <div className="text-center text-sm">
-                    <span className="text-gray-600">Déjà un compte ? </span>
-                    <Link href="/connection" className="font-medium text-black hover:underline">
-                      Se connecter
-                    </Link>
-                  </div>
-                </CardFooter>
-              </form>
-            </Card>
-          </div>
-        </div>
-      </main>
+            <div className="text-center text-sm">
+              <span className="text-gray-600">Déjà un compte ? </span>
+              <Link
+                href="/connection"
+                className="font-medium text-blue-700 hover:text-blue-900 transition-colors"
+              >
+                Se connecter
+              </Link>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   );
 }

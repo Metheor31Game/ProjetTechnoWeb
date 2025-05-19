@@ -15,7 +15,7 @@ app.use(
   cors({
     origin: "http://localhost:3001",
     credentials: true,
-  })
+  }),
 );
 
 app.engine("handlebars", engine());
@@ -29,20 +29,23 @@ app.use(
   session({
     secret: "votre_secret",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      // sameSite: "none", // Décommenter pour tester si sameSite pose problème
       maxAge: 1000 * 60 * 60,
     },
-  })
+  }),
 );
 
 // - - - - - - - - - LES ROUTES  - - - - - - - - -
 
 // Middleware pour vérifier si un utilisateur est connecté
 const requireAuth = (req, res, next) => {
+  console.log("Session (requireAuth):", req.session);
+  console.log("Cookies (requireAuth):", req.headers.cookie);
   if (!req.session.user) {
     return res
       .status(401)
@@ -50,6 +53,41 @@ const requireAuth = (req, res, next) => {
   }
   next();
 };
+
+// Route pour tester l'état de la session
+app.get("/test-session", (req, res) => {
+  console.log("Test Session:", req.session);
+  if (req.session.user) {
+    res.status(200).json({ user: req.session.user, message: "Session active" });
+  } else {
+    res.status(401).json({ message: "Aucune session active" });
+  }
+});
+
+// Route pour récupérer les informations de l'utilisateur connecté
+app.get("/user", requireAuth, async (req, res) => {
+  const currentUser = req.session.user;
+
+  try {
+    const connection = await initialiseDatabase();
+    const [rows] = await connection.query(
+      "SELECT prenom, nom FROM utilisateur WHERE pseudo = ?",
+      [currentUser],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    res.status(200).json({ prenom: rows[0].prenom, nom: rows[0].nom });
+  } catch (err) {
+    console.error(
+      "Erreur lors de la récupération des infos utilisateur :",
+      err,
+    );
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+});
 
 // Route principale
 app.get("/", (req, res) => {
@@ -88,7 +126,7 @@ app.post("/inscription", async (req, res) => {
       pseudo,
     ]);
 
-    res.status(201).json({ message: "Inscription réussie" }); // Changé en JSON
+    res.status(201).json({ message: "Inscription réussie" });
   } catch (err) {
     console.error("Erreur lors de l'inscription :", err);
     res.status(500).json({ message: "Erreur lors de l'inscription." });
@@ -98,7 +136,7 @@ app.post("/inscription", async (req, res) => {
 // Route pour se connecter
 app.get("/connection", (req, res) => {
   if (req.session.user) {
-    res.status(200).json({ message: "Déjà connecté" }); // Changé en JSON
+    res.status(200).json({ message: "Déjà connecté" });
   } else {
     res.status(200).render("connection", {});
   }
@@ -119,12 +157,13 @@ app.post("/connection", async (req, res) => {
       const match = await bcrypt.compare(mdp, rows[0].mdp);
       if (match) {
         req.session.user = pseudo;
-        return res.status(200).json({ message: "Connexion réussie" }); // Changé en JSON
+        console.log("Connexion réussie, session enregistrée:", req.session);
+        return res.status(200).json({ message: "Connexion réussie" });
       } else {
-        return res.status(401).json({ message: "Mot de passe incorrect." }); // Changé en JSON
+        return res.status(401).json({ message: "Mot de passe incorrect." });
       }
     } else {
-      return res.status(404).json({ message: "Utilisateur non trouvé." }); // Changé en JSON
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
     }
   } catch (err) {
     console.error("Erreur lors de la connexion :", err);
@@ -140,7 +179,7 @@ app.get("/logout", (req, res) => {
         .status(500)
         .json({ message: "Erreur lors de la déconnexion." });
     }
-    res.status(200).json({ message: "Déconnexion réussie" }); // Changé en JSON
+    res.status(200).json({ message: "Déconnexion réussie" });
   });
 });
 
@@ -164,7 +203,7 @@ app.get("/dashboard", requireAuth, async (req, res) => {
       [dashboard[0].id_dashboard],
     );
 
-    res.status(200).json(annonces); // Changé en JSON
+    res.status(200).json(annonces);
   } catch (err) {
     console.error("Erreur lors de la récupération des annonces :", err);
     res.status(500).json({ message: "Erreur interne du serveur." });
@@ -190,7 +229,7 @@ app.get("/delete", requireAuth, async (req, res) => {
 
     await connection.query(query, idArray);
 
-    res.status(200).json({ message: "Suppression réussie" }); // Changé en JSON
+    res.status(200).json({ message: "Suppression réussie" });
   } catch (err) {
     console.error("Erreur lors de la suppression des annonces :", err);
     res
@@ -218,7 +257,7 @@ app.get("/annonce/details", requireAuth, async (req, res) => {
       return res.status(404).json({ message: "Annonce introuvable." });
     }
 
-    res.status(200).json(rows[0]); // Changé en JSON
+    res.status(200).json(rows[0]);
   } catch (err) {
     console.error(
       "Erreur lors de la récupération des détails de l'annonce :",
@@ -259,7 +298,7 @@ app.post("/upload", requireAuth, async (req, res) => {
       ],
     );
 
-    res.status(201).json({ message: "Annonce ajoutée" }); // Changé en JSON
+    res.status(201).json({ message: "Annonce ajoutée" });
   } catch (err) {
     console.error("Erreur lors de l'ajout de l'annonce  : ", err);
     res.status(500).json({ message: "Erreur lors de l'ajout d'une annonce" });
